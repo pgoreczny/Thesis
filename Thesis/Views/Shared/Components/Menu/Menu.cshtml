@@ -1,0 +1,41 @@
+﻿@model List<MenuItem>
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Thesis</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                @foreach (MenuItem menuItem in Model)
+                {
+                if(menuItem.children.Count == 0)
+                {
+                <li class="nav-item">
+                    <a class="nav-link" href="@menuItem.url">@menuItem.name</a>
+                </li>
+                }
+                else
+                {
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="@menuItem.url" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @menuItem.name
+                    </a>
+                    <ul class="dropdown-menu">
+                        @foreach (MenuItem child in menuItem.children)
+                        {
+                            <li><a class="dropdown-item" href="@child.url">@child.name</a></li>
+                        }
+                    </ul>
+                </li>
+                }
+                }
+            </ul>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+</nav>
