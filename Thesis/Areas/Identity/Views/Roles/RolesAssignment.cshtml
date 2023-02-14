@@ -1,0 +1,32 @@
+﻿@using Thesis.Areas.Identity.Models
+@model List<UserModel>
+
+<table>
+    <thead>
+    <th>
+
+    </th>
+    <th>
+
+    </th>
+    </thead>
+    @foreach (UserModel user in Model)
+    {
+        <tr>
+            <td>
+                @user.userName
+            </td>
+            <td>
+                <table>
+                    @foreach(string role in user.roles)
+                    {
+                        <tr>
+                            <td>@role</td>
+                            <td><a href="">X</a></td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+    }
+</table>

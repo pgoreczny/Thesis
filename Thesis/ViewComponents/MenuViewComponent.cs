@@ -1,19 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Thesis.database;
 using Thesis.Models;
+using Thesis.Services;
 
 namespace Thesis.ViewComponents
 {
-    public class MenuViewComponent: ViewComponent
+    public class MenuViewComponent : ViewComponent
     {
-        List<MenuItem>menu = new List<MenuItem>();
-        public MenuViewComponent()
+        private readonly MenuService menuService;
+        public MenuViewComponent(MenuService menuService)
         {
-            menu = DatabaseTest.getMenus();
+            this.menuService = menuService;
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var model = menu;
+            var model = await menuService.getMenus();
             return await Task.FromResult((IViewComponentResult)View("Menu", model));
         }
     }

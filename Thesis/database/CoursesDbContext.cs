@@ -1,23 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Thesis.Models;
-using static NuGet.Packaging.PackagingConstants;
 
 namespace Thesis.database
 {
-    public class CoursesDBContext : DbContext
+    public class CoursesDBContext : IdentityDbContext<IdentityUser>
     {
         public CoursesDBContext()
         {
 
         }
+
+        public CoursesDBContext(DbContextOptions<CoursesDBContext> options): base(options)
+        {
+        }
         // Entities        
         public DbSet<MenuItem> menus { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"data source=IBM\SQLEXPRESS;initial catalog=courses;trusted_connection=true;TrustServerCertificate=True");
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,7 +29,7 @@ namespace Thesis.database
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
             });
-            // ...
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

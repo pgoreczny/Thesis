@@ -1,0 +1,71 @@
+﻿@using Thesis.Areas.Identity.Models
+@model (UserModel, List<Role>)
+
+<form id="editForm" data-user="@Model.Item1.id" method="post" action="/Identity/User/Save">
+    <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
+    <div class="mb-3">
+        <label for="userName" class="form-label">Username</label>
+        <input name="userName" value="@Model.Item1.userName"  class="form-control" id="userName">
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">E-mail</label>
+        <input name="email" value="@Model.Item1.email" class="form-control" id="email">
+    <div class="mb-3">
+        <label for="roles" class="form-label">Roles</label>
+        <table>
+            @foreach (Role role in Model.Item2)
+            {
+                <tr>
+                    <td>
+                        @role.name
+                    </td>
+                    <td>
+                        @if (role.isOn)
+                        {
+                            <input data-role="@role.name" class="role" type="checkbox" checked />
+                        }
+                        else
+                        {
+                            <input data-role="@role.name" class="role" type="checkbox" />
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script type="text/javascript">
+    window.onload = function() {
+    $('.role').change(function() {
+        const content = {
+            userId: $('#editForm').data('user'),
+            name: $(this).data('role'),
+            isOn: $(this).is(':checked')
+        };
+        console.log(content);
+        fetch('/Identity/Roles/AssignRole', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(content)
+            })
+            .then(function(a) {
+                return a.json();
+            })
+            .then(function(data) {
+                Toastify({
+                    text: data.text,
+                    duration: 3000,
+                    style: {
+                        background: data.success ? "green": "red"
+                    }
+            }).showToast();
+            })
+            .catch(error => alert(error));
+    })
+}
+</script>

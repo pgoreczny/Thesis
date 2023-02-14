@@ -8,5 +8,6 @@
         public int? ParentId { get; set; }
         public MenuItem? Parent { get; set; }
         public ICollection<MenuItem>children { get; set; }
+        public string claim { get; set; }
     }
 }

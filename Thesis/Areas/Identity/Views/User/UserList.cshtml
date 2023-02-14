@@ -1,0 +1,68 @@
+﻿@using Thesis.Areas.Identity.Models
+@model List<UserModel>
+
+<style>
+    .userrow:hover {
+        cursor: pointer;
+    }
+</style>
+
+<table class="table table-striped .table-responsive">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                Username
+            </th>
+            <th>
+                Email address
+            </th>
+            <th>
+                Email confirmed
+            </th>
+            <th>
+                List of roles
+            </th>
+        </tr>
+    </thead>
+    @foreach (UserModel user in Model)
+    {
+        <tr class="userrow" data-id="@user.id">
+            <td>
+                <input class="rowCheckbox" type="checkbox" />
+            </td>
+            <td>
+                @user.userName
+            </td>
+            <td>
+                @user.email
+            </td>
+            <td>
+                @if (user.emailConfirmed)
+                {
+                    <span>Yes</span>
+                }
+                else
+                {
+                    <>No</>
+                }
+            </td>
+            <td>
+                @string.Join(",", user.roles.ToArray())
+            </td>
+        </tr>
+    }
+</table>
+
+<script type="text/javascript">
+    window.onload = function () {
+        $(function () {
+            $('.userrow').click(function () {
+                document.location = '/Identity/User/editUser?id=' + $(this).data('id')
+            })
+            $('#delete').click(function () {
+                const ids = ('.rowCheckbox:checkbox:checked').forEach(checkbox => checkbox.parent().data('id'))
+            })
+        })
+    }
+</script>
