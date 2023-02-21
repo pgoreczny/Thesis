@@ -7,6 +7,10 @@
     }
 </style>
 
+<button id="delete" disabled class="btn btn-outline-danger">
+    Delete
+</button>
+
 <table class="table table-striped .table-responsive">
     <thead>
         <tr>
@@ -29,7 +33,7 @@
     {
         <tr class="userrow" data-id="@user.id">
             <td>
-                <input class="rowCheckbox" type="checkbox" />
+                <input data-id="@user.id" class="rowCheckbox" type="checkbox" />
             </td>
             <td>
                 @user.userName
@@ -55,13 +59,60 @@
 </table>
 
 <script type="text/javascript">
+    function getChecked() {
+        return $('.rowCheckbox:checkbox:checked').map(function () {
+            return $(this).data('id');
+        }).get()
+    }
     window.onload = function () {
         $(function () {
+            $('.rowCheckbox').click(function (ev) {
+                ev.stopPropagation();
+                if (getChecked().length > 0) {
+                    $('#delete').prop('disabled', false);
+                }
+                else {
+                    $('#delete').prop('disabled', true);
+                }
+            })
             $('.userrow').click(function () {
                 document.location = '/Identity/User/editUser?id=' + $(this).data('id')
             })
             $('#delete').click(function () {
-                const ids = ('.rowCheckbox:checkbox:checked').forEach(checkbox => checkbox.parent().data('id'))
+                const userIds = getChecked();
+                fetch('/Identity/User/delete', {
+                    method: 'Delete',
+                    headers: {
+                        Accept: 'application.json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userIds)
+                })
+                    .then(function (a) {
+                        return a.json();
+                    })
+                    .then(function (data) {
+                        Toastify({
+                            text: data.text,
+                            duration: 3000,
+                            style: {
+                                background: data.success ? "green" : "red"
+                            }
+                        }).showToast();
+                        if (data.success) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+                        }
+                    })
+                    .catch(error => Toastify({
+                        text: error,
+                        duration: 3000,
+                        style: {
+                            background: "red"
+                        }
+                    }).showToast()
+                    )
             })
         })
     }

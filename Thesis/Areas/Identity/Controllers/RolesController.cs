@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NuGet.Versioning;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Models;
 using System.Security.Claims;
 using Thesis.Areas.Identity.Models;
 using Roles = Thesis.Areas.Identity.Constants.Roles;
-using static Thesis.Areas.Identity.Constants.Claims;
 
 namespace Thesis.Areas.Identity.Controllers
 {
@@ -16,10 +14,12 @@ namespace Thesis.Areas.Identity.Controllers
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<IdentityUser> userManager;
-        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+        private readonly SignInManager<IdentityUser> signInManager;
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
+            this.signInManager = signInManager;
         }
         public IActionResult Index()
         {
@@ -27,6 +27,7 @@ namespace Thesis.Areas.Identity.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.Admin)]
         public async Task setUp()
         {
             IdentityRole admin = new IdentityRole(Roles.Admin);
@@ -73,6 +74,7 @@ namespace Thesis.Areas.Identity.Controllers
                 IdentityResult result = role.isOn ? await userManager.AddToRoleAsync(user, role.name) : await userManager.RemoveFromRoleAsync(user, role.name);
                 if (result.Succeeded)
                 {
+                    await signInManager.SignInAsync(user, false);
                     return new OperationResult { success = true, text = "Role set successfully" };
                 }
                 return new OperationResult { success = false, text = result.Errors.First().Description };

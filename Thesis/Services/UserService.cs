@@ -27,7 +27,14 @@ namespace Thesis.Services
 
         public async Task<IdentityUser> getUserById(string userId)
         {
-            return await userManager.FindByIdAsync(userId);
+            try
+            {
+                return await userManager.FindByIdAsync(userId);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
         public async Task<IdentityUser> getUserByName(string name)
         {

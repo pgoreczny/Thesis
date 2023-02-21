@@ -2,23 +2,6 @@
 @model (UserModel, List<Role>)
 <htmL>
    <body>
-      <div class="modal fade" id="myModal" role="dialog">
-         <div class="modal-dialog">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  <h4 class="modal-title">Information</h4>
-               </div>
-               <div class="modal-body">
-                  ABC
-               </div>
-               <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-               </div>
-            </div>
-         </div>
-      </div>
-      <div onclick="modal()" class= "btn btn-warning">Change password</div>
       <form id="editForm" data-user="@Model.Item1.id" method="post" action="/Identity/User/Save">
          <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
          <div class="mb-3">
@@ -55,39 +38,46 @@
       </form>
       <script type="text/javascript">
          window.onload = function() {
-         $('.role').change(function() {
-             const content = {
-                 userId: $('#editForm').data('user'),
-                 name: $(this).data('role'),
-                 isOn: $(this).is(':checked')
-             };
-             console.log(content);
-             fetch('/Identity/Roles/AssignRole', {
-                     method: 'POST',
-                     headers: {
-                         Accept: 'application.json',
-                         'Content-Type': 'application/json'
-                     },
-                     body: JSON.stringify(content)
-                 })
-                 .then(function(a) {
-                     return a.json();
-                 })
-                 .then(function(data) {
-                     Toastify({
-                         text: data.text,
-                         duration: 3000,
-                         style: {
-                             background: data.success ? "green": "red"
-                         }
-                 }).showToast();
-                 })
-                 .catch(error => alert(error));
-         })
-         function modal() {
-             //$('.modal-body').html(data);
-              $("#myModal").modal("show");
-         }
+             $('#showModal').click(function () {
+                 $("#myModal").modal("show");
+             })
+             $('.hideModal').click(function () {
+                 $("#myModal").modal("hide");
+             })
+             $('.role').change(function() {
+                 const content = {
+                     userId: $('#editForm').data('user'),
+                     name: $(this).data('role'),
+                     isOn: $(this).is(':checked')
+                 };
+                 fetch('/Identity/Roles/AssignRole', {
+                         method: 'POST',
+                         headers: {
+                             Accept: 'application.json',
+                             'Content-Type': 'application/json'
+                         },
+                         body: JSON.stringify(content)
+                     })
+                     .then(function(a) {
+                         return a.json();
+                     })
+                     .then(function(data) {
+                         Toastify({
+                             text: data.text,
+                             duration: 3000,
+                             style: {
+                                 background: data.success ? "green": "red"
+                             }
+                     }).showToast();
+                     })
+                     .catch(error => Toastify({
+                             text: error,
+                             duration: 3000,
+                             style: {
+                                 background: "red"
+                             }
+                     }).showToast())
+             })
          }
       </script>
    </body>
