@@ -13,8 +13,6 @@ namespace Thesis.Controllers
         {
             if (file != null)
             {
-                //TODO
-                //get list of allowed extensions from db
                 List<string> extensions = new List<string>();
                 extensions.Add(".pdf");
                 extensions.Add(".docx");

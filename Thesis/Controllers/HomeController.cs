@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Thesis.database;
 using Thesis.Models;
 using Thesis.Services;
+using Activity = System.Diagnostics.Activity;
 
 namespace Thesis.Controllers
 {

@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Thesis.Models;
+using File = Thesis.Models.File;
 
 namespace Thesis.database
 {
-    public class CoursesDBContext : IdentityDbContext<IdentityUser>
+    public class CoursesDBContext : IdentityDbContext<ApplicationUser>
     {
         public CoursesDBContext()
         {
@@ -17,6 +18,12 @@ namespace Thesis.database
         }
         // Entities        
         public DbSet<MenuItem> menus { get; set; }
+        public DbSet<Course> courses { get; set; }
+        public DbSet<CourseApplicationUser> courseApplicationUsers { get; set; }
+        public DbSet<Activity> activities { get; set; }
+        public DbSet<File> files { get; set; }
+        public DbSet<Answer> answers { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +36,28 @@ namespace Thesis.database
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+            modelBuilder.Entity<Activity>(entity =>
+            {
+                entity.HasKey(x => x.id);
+                entity.HasOne(x => x.course)
+                    .WithMany(x => x.activities)
+                    .HasForeignKey(x => x.courseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CourseApplicationUser>().HasKey(cau => new { cau.CourseId, cau.ApplicationUserId });
+
+            modelBuilder.Entity<CourseApplicationUser>()
+                .HasOne(au => au.applicationUser)
+                .WithMany(s => s.CourseApplicationUsers)
+                .HasForeignKey(c => c.ApplicationUserId);
+
+
+            modelBuilder.Entity<CourseApplicationUser>()
+                .HasOne(c => c.course)
+                .WithMany(c => c.CourseApplicationUsers)
+                .HasForeignKey(au => au.CourseId);
+
             base.OnModelCreating(modelBuilder);
         }
     }
