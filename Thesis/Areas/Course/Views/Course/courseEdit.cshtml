@@ -1,0 +1,119 @@
+﻿@using Thesis.Models
+@model (Course, List<Activity>)
+<htmL>
+   <body>
+      <form id="editForm" data-user="@Model.Item1.id" method="post" action="/Course/Course/Save">
+         <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
+         @await Component.InvokeAsync("Input", ("name", "Name", Model.Item1.name))
+         @await Component.InvokeAsync("TextArea", ("description", "Description", Model.Item1.description))
+         @await Component.InvokeAsync("DateInput", ("startDate", "Start date", Model.Item1.startDate))
+         @await Component.InvokeAsync("DateInput", ("endDate", "End date", Model.Item1.endDate))
+         <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      <hr />
+      <partial>
+        @{
+            Html.RenderPartial("ActivityListPartial", (Model.Item2, Model.Item1));
+        }
+        @{
+            List<CourseApplicationUser> awaitingUsers = Model.Item1.CourseApplicationUsers.Where(user => user.status == enCourseUserStatus.waitingForApproval).ToList();
+            if (awaitingUsers.Count > 0)
+            {
+                    <hr />
+                    <h2>Awaiting students</h2>
+                    <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>e-mail</th>
+                            <th>Approve</th>
+                            <th>Deny</th>
+                        </tr>
+                    </thead>
+                    @foreach (CourseApplicationUser user in awaitingUsers)
+                {
+                        <tr>
+                            <td>@user.applicationUser.UserName</td>
+                            <td>@user.applicationUser.Email</td>
+                            <td><div data-id="@user.applicationUser.Id" class="btn btn-success userApprove">Approve</div></td>
+                            <td><div data-id="@user.applicationUser.Id" class="btn btn-danger userDeny">Deny</div></td>
+                        </tr>
+                }
+                    </table>
+            }
+       }
+      </partial>
+      <script type="text/javascript">
+         window.onload = function() {
+             $('.userApprove').click(function () {
+                fetch('/Course/Course/ApproveUser?id=' + $(this).data('id'), {
+                method: 'Delete',
+            })
+            .then(function (a) {
+                return a.json();
+            })
+            .then(function (data) {
+                Toastify({
+                    text: data.text,
+                    duration: 3000,
+                    style: {
+                        background: data.success ? "green" : "red"
+                    }
+                }).showToast();
+                if (data.success) {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => Toastify({
+                text: error,
+                duration: 3000,
+                style: {
+                    background: "red"
+                }
+            }).showToast()
+            )
+             })
+             $('.userDeny').click(function () {
+                fetch('/Course/Course/DenyUser?id=' + $(this).data('id'), {
+                method: 'Post',
+            })
+            .then(function (a) {
+                return a.json();
+            })
+            .then(function (data) {
+                Toastify({
+                    text: data.text,
+                    duration: 3000,
+                    style: {
+                        background: data.success ? "green" : "red"
+                    }
+                }).showToast();
+                if (data.success) {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => Toastify({
+                text: error,
+                duration: 3000,
+                style: {
+                    background: "red"
+                }
+            }).showToast()
+            )
+             })
+             $('#startDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+            $('#endDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+         }
+      </script>
+   </body>
+</html>

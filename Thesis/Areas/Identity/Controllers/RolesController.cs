@@ -13,22 +13,19 @@ namespace Thesis.Areas.Identity.Controllers
     public class RolesController : Controller
     {
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
-        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private List<Breadcrumb> crumbs = new List<Breadcrumb>();
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.signInManager = signInManager;
-        }
-        public IActionResult Index()
-        {
-            return View();
+            crumbs.Add(new Breadcrumb { text = "Home", url = "/" });
         }
 
-        [HttpPost]
         [Authorize(Roles = Roles.Admin)]
-        public async Task setUp()
+        public async System.Threading.Tasks.Task setUp()
         {
             IdentityRole admin = new IdentityRole(Roles.Admin);
             IdentityRole lecturer = new IdentityRole(Roles.Lecturer);
@@ -44,30 +41,58 @@ namespace Thesis.Areas.Identity.Controllers
             registered = await roleManager.FindByNameAsync(Roles.Registered);
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Roles.AssignRole));
             await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.Basic.IsRegistered));
+
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserList));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserAdd));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserEdit));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserDelete));
             await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Users.UserList));
+
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseList));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseAdd));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseEdit));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseDelete));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.ManageUsers));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseList));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseAdd));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseEdit));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseDelete));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.ManageUsers));
+
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.AccessCourse));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.JoinCourse));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.AccessCourse));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.JoinCourse));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.JoinCourse));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
+            await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
         }
 
-        [Authorize(Policy = Claims.Roles.AssignRole)]
-        public IActionResult AssignRole()
-        {
-            List<IdentityUser> identityUsers = userManager.Users.ToList();
-            List<UserModel> users = new List<UserModel>(identityUsers.Count);
-            foreach (IdentityUser user in identityUsers)
-            {
-                users.Add(new UserModel { userName = user.UserName, roles = userManager.GetRolesAsync(user).Result.ToList() });
-            }
-            return View("RolesAssignment", users);
-        }
+        //[Authorize(Policy = Claims.Roles.AssignRole)]
+        //public IActionResult AssignRole()
+        //{
+        //    crumbs.Add(new Breadcrumb { text = "Courses", current = true });
+        //    crumbs.Add(new Breadcrumb { text = "Assign role", current = true });
+        //    ViewBag.crumbs = crumbs;
+        //    List<ApplicationUser> ApplicationUsers = userManager.Users.ToList();
+        //    List<UserModel> users = new List<UserModel>(ApplicationUsers.Count);
+        //    foreach (ApplicationUser user in ApplicationUsers)
+        //    {
+        //        users.Add(new UserModel { userName = user.UserName, roles = userManager.GetRolesAsync(user).Result.ToList() });
+        //    }
+        //    return View("RolesAssignment", users);
+        //}
 
         [HttpPost]
         [Authorize(Policy = Claims.Roles.AssignRole)]
         public async Task<OperationResult> AssignRole([FromBody] Role role)
         {
-            IdentityUser user = await userManager.FindByIdAsync(role.userId);
+            ApplicationUser user = await userManager.FindByIdAsync(role.userId);
 
             if (user != null && Roles.list.Contains(role.name))
             {

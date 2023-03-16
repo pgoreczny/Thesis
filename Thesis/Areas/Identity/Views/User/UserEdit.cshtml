@@ -4,13 +4,8 @@
    <body>
       <form id="editForm" data-user="@Model.Item1.id" method="post" action="/Identity/User/Save">
          <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
-         <div class="mb-3">
-            <label for="userName" class="form-label">Username</label>
-            <input name="userName" value="@Model.Item1.userName"  class="form-control" id="userName">
-         </div>
-         <div class="mb-3">
-         <label for="email" class="form-label">E-mail</label>
-         <input name="email" value="@Model.Item1.email" class="form-control" id="email">
+         @await Component.InvokeAsync("Input", ("userName", "Username", Model.Item1.userName))
+         @await Component.InvokeAsync("Input", ("email", "E-mail", Model.Item1.email))
          <div class="mb-3">
             <label for="roles" class="form-label">Roles</label>
             <table>

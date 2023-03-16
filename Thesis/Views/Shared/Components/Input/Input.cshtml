@@ -1,0 +1,5 @@
+﻿@model (string name, string label, string value)
+<div class="mb-3">
+    <label for="@Model.name" class="form-label">@Model.label</label>
+    <input name="@Model.name" value="@Model.value" class="form-control" id="@Model.name">
+</div>

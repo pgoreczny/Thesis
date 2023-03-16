@@ -1,0 +1,131 @@
+﻿@model (List<Thesis.Models.Activity>, Thesis.Models.Course)
+
+<style>
+    .userrow:hover {
+        cursor: pointer;
+    }
+</style>
+
+<button onclick="location.href='/Course/Activity/Add?type=activity&courseId=@Model.Item2.id';" data-type="activity" class="btn btn-success add">
+    Add activity
+</button>
+
+<button onclick="location.href='/Course/Activity/Add?type=task&courseId=@Model.Item2.id';" data-type="task" class="btn btn-success add">
+    Add task
+</button>
+
+
+<table id="activities" data-course="@Model.Item2" class="table table-striped table-responsive">
+    <thead>
+        <tr>
+            <th>
+                Title
+            </th>
+            <th>
+                Show date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Files count
+            </th>
+            <th>
+                Due date
+            </th>
+            <th>
+                Answers
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (Thesis.Models.Activity activity in Model.Item1)
+    {
+        <tr onclick="show(@activity.id)" class="userrow" data-id="@activity.id">
+            <td>
+                @activity.title
+            </td>
+            <td>
+                @activity.showDate.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @if (activity.activityType == Thesis.Models.enActivityType.task)
+                {
+                    <span>Task</span>
+                }
+                else
+                {
+                    <span>Lesson</span>
+                }
+            </td>
+            <td>
+                @activity.files.Count
+            </td>
+            <td>
+                @if (activity.activityType == Thesis.Models.enActivityType.task)
+                {
+                    <span>@activity.dueDate</span>
+                }
+            </td>
+            <td>
+                @if (activity.activityType == Thesis.Models.enActivityType.task)
+                {
+                    if (activity.answers != null)
+                    {
+                        <span>@activity.answers.Count</span>
+                    }
+                }
+            </td>
+            <td>
+                <i onclick="deleteActivity(event, @activity.id)" data-id="@activity.id" class="bi bi-trash-fill delete"></i>
+            </td>
+        </tr>
+    }
+</table>
+
+<script type="text/javascript">
+    function getChecked() {
+        return $('.rowCheckbox:checkbox:checked').map(function () {
+            return $(this).data('id');
+        }).get()
+    }
+    function show(id) {
+        console.log(event);
+        document.location = '/Course/Activity/edit?id=' + id;
+    }
+    function deleteActivity(e, id) {
+        e.stopPropagation();
+        fetch('/Course/Activity/delete?id=' + id, {
+            method: 'Delete',
+            headers: {
+                Accept: 'application.json',
+                'Content-Type': 'application/json'
+            },
+        })
+            .then(function (a) {
+                return a.json();
+            })
+            .then(function (data) {
+                Toastify({
+                    text: data.text,
+                    duration: 3000,
+                    style: {
+                        background: data.success ? "green" : "red"
+                    }
+                }).showToast();
+                if (data.success) {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => Toastify({
+                text: error,
+                duration: 3000,
+                style: {
+                    background: "red"
+                }
+            }).showToast()
+            )
+    }
+</script>

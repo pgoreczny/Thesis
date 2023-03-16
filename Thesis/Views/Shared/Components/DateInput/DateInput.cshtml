@@ -1,0 +1,13 @@
+﻿@model (string name, string label, DateTime value)
+
+<div class="mb-3">
+    <label for="@Model.name" class="form-label">@Model.label</label>
+    @if (Model.value.Year < 2000)
+    {
+        <input name="@Model.name" placeholder="DD-MM-YYYY" class="form-control" id="@Model.name">
+    }
+    else
+    {
+        <input name="@Model.name" placeholder="DD-MM-YYYY" value="@Model.value.ToString("dd-MM-yyyy")" class="form-control" id="@Model.name">
+    }
+</div>

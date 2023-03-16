@@ -2,20 +2,21 @@
 using System.Security.Claims;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Areas.Identity.Models;
+using Thesis.Models;
 
 namespace Thesis.Services
 {
     public class UserService
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IHttpContextAccessor accessor;
-        public UserService(UserManager<IdentityUser> userManager, IHttpContextAccessor accessor)
+        public UserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor accessor)
         {
             this.userManager = userManager;
             this.accessor = accessor;
         }
 
-        public async Task<IdentityUser> getCurrentUser()
+        public async Task<ApplicationUser> getCurrentUser()
         {
             if (accessor?.HttpContext?.User == null)
             {
@@ -25,7 +26,7 @@ namespace Thesis.Services
             return await userManager.FindByNameAsync(username);
         }
 
-        public async Task<IdentityUser> getUserById(string userId)
+        public async Task<ApplicationUser> getUserById(string userId)
         {
             try
             {
@@ -36,7 +37,7 @@ namespace Thesis.Services
                 return null;
             }
         }
-        public async Task<IdentityUser> getUserByName(string name)
+        public async Task<ApplicationUser> getUserByName(string name)
         {
             return await userManager.FindByNameAsync(name);
         }
@@ -55,7 +56,7 @@ namespace Thesis.Services
             return claims;
         }
 
-        public UserModel GetUserModel(IdentityUser user)
+        public UserModel GetUserModel(ApplicationUser user)
         {
             return new UserModel
             {
@@ -67,5 +68,9 @@ namespace Thesis.Services
             };
         }
 
+        public IdentityResult updateUser(ApplicationUser user)
+        {
+            return userManager.UpdateAsync(user).Result;
+        }
     }
 }

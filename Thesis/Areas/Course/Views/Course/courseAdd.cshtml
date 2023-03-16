@@ -1,0 +1,26 @@
+﻿@using Thesis.Models
+@model Course
+<htmL>
+   <body>
+      <form id="editForm" data-user="@Model.id" method="post" action="/Course/Course/Save">
+         <input name="id" style="visibility: hidden" id = "id" value = "@Model.id" />
+         @await Component.InvokeAsync("Input", ("name", "Name", Model.name))
+         @await Component.InvokeAsync("TextArea", ("description", "Description", Model.description))
+         @await Component.InvokeAsync("DateInput", ("startDate", "Start date", Model.startDate))
+         @await Component.InvokeAsync("DateInput", ("endDate", "End date", Model.endDate))
+         <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      <script>
+          window.onload = function () {
+            $('#startDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+            $('#endDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+          }
+      </script>
+   </body>
+</html>

@@ -1,0 +1,13 @@
+﻿@model (string name, string label, bool value)
+
+<div class="mb-3 form-check form-switch">
+    <label for="@Model.name" class="form-check-label">@Model.label</label>
+    @if (Model.value)
+    {
+        <input type="checkbox" name="@Model.name" class="form-check-input" checked id="@Model.name">
+    }
+    else
+    {
+        <input type="checkbox" name="@Model.name" class="form-check-input" id="@Model.name">
+    }
+</div>

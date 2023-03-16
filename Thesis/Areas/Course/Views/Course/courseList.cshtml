@@ -1,0 +1,149 @@
+﻿@model List<Thesis.Models.Course>
+
+<style>
+    .userrow:hover {
+        cursor: pointer;
+    }
+</style>
+
+<button id="add" class="btn btn-success">
+    Add course
+</button>
+
+<button id="delete" disabled class="btn btn-outline-danger">
+    Delete
+</button>
+
+<table class="table table-striped .table-responsive">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                Name
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                Start date
+            </th>
+            <th>
+                End date
+            </th>
+            <th>
+                Created
+            </th>
+            <th>
+                Created by
+            </th>
+            <th>
+                Updated
+            </th>
+            <th>
+                Updated by
+            </th>
+        </tr>
+    </thead>
+    @foreach (Thesis.Models.Course course in Model)
+    {
+        <tr class="userrow" data-id="@course.id">
+            <td>
+                <input data-id="@course.id" class="rowCheckbox" type="checkbox" />
+            </td>
+            <td>
+                @course.name
+            </td>
+            <td>
+                @if ((course.description ?? "").Length > 50)
+                {
+                    <span>@course.description.Substring(0,50)...</span>
+                }
+                else
+                {
+                    <span>@course.description</span>
+                }
+            </td>
+            <td>
+                @course.startDate.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @course.endDate.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @course.createDate.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @course.createdBy.UserName
+            </td>
+            <td>
+                @course.updateDate.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @course.updatedBy.UserName
+            </td>
+        </tr>
+    }
+</table>
+
+<script type="text/javascript">
+    function getChecked() {
+        return $('.rowCheckbox:checkbox:checked').map(function () {
+            return $(this).data('id');
+        }).get()
+    }
+    window.onload = function () {
+        $(function () {
+            $('.rowCheckbox').click(function (ev) {
+                ev.stopPropagation();
+                if (getChecked().length > 0) {
+                    $('#delete').prop('disabled', false);
+                }
+                else {
+                    $('#delete').prop('disabled', true);
+                }
+            })
+            $('.userrow').click(function () {
+                document.location = '/Course/Course/edit?id=' + $(this).data('id')
+            })
+            $('#add').click(function () {
+                document.location = '/Course/Course/Add'
+            })
+            $('#delete').click(function () {
+                const ids = getChecked();
+                fetch('/Course/Course/delete', {
+                    method: 'Delete',
+                    headers: {
+                        Accept: 'application.json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(ids)
+                })
+                    .then(function (a) {
+                        return a.json();
+                    })
+                    .then(function (data) {
+                        Toastify({
+                            text: data.text,
+                            duration: 3000,
+                            style: {
+                                background: data.success ? "green" : "red"
+                            }
+                        }).showToast();
+                        if (data.success) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+                        }
+                    })
+                    .catch(error => Toastify({
+                        text: error,
+                        duration: 3000,
+                        style: {
+                            background: "red"
+                        }
+                    }).showToast()
+                    )
+            })
+        })
+    }
+</script>

@@ -1,0 +1,123 @@
+﻿@using Thesis.Models
+@model Activity
+<htmL>
+    <head>
+        <style>
+            .download {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+   <body>
+      <form id="editForm" data-user="@Model.id" method="post" action="/Course/Activity/Save">
+        <div id="submitForm" class="btn btn-primary">Save</div>
+        <input name="id" style="visibility: hidden" id = "id" value = "@Model.id" />
+        <input name="courseId" style="visibility: hidden" id = "courseId" value = "@Model.courseId" />
+        <input name="activityType" style="visibility: hidden" id = "activityType" value = "@Model.activityType" />
+        @await Component.InvokeAsync("Input", ("title", "Title", Model.title))
+        @await Component.InvokeAsync("TextArea", ("text", "Content", Model.text))
+        @await Component.InvokeAsync("DateInput", ("showDate", "Show date", Model.showDate))
+        @if (Model.activityType == enActivityType.task)
+        {
+            @await Component.InvokeAsync("DateInput", ("dueDate", "Due date", Model.dueDate))
+            @await Component.InvokeAsync("Checkbox", ("allowText", "Allow text answers", Model.allowText))
+            @await Component.InvokeAsync("Checkbox", ("allowFIle", "Allow files as answers", Model.allowFile))
+        }
+      </form>
+
+      @if (Model.id > 0)
+         {
+             <hr />
+             <form class="col-xs-12" method="post" action="/Course/Activity/SaveFile?id=@Model.id" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" class="form-control" name="file" />
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary col-xs-12">Add file</button>
+                </div>
+            </form>
+            <table class="table table-striped .table-responsive">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                @foreach (File file in Model.files)
+                {
+                    <tr>
+                        <td>@file.name</td>
+                        <td data-name="@file.showName" data-id="@file.Id" class="download"><i class="bi bi-download"></i></td>
+                    </tr>
+                }
+            </table>
+         }
+        @if (Model.activityType == enActivityType.task)
+        {
+
+            <hr />
+            <h2>Answers</h2>
+            <table class="table table-striped .table-responsive">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                @foreach (File file in Model.files)
+                {
+                    <tr>
+                        <td>abc</td>
+                        <td data-name="@file.showName" data-id="@file.Id" class="download"><i class="bi bi-download"></i></td>
+                    </tr>
+                }
+            </table>
+        }
+      <script type="text/javascript">
+         window.onload = function() {
+             $('#submitForm').click(function(e) {
+                 e.stopPropagation();
+                 var form = Object.fromEntries(new FormData($('#editForm')[0]));
+                 form["showDate"] = formatDate($('#showDate').val());
+                 if ($('#activityType').val() === 'task') {
+                     form["allowFIle"] = form["allowFIle"] == 'on' ? true : false; 
+                     form["allowText"] = form["allowText"] == 'on' ? true : false; 
+                     form["dueDate"] = formatDate($('#dueDate').val());
+                 }
+                 var formData = new FormData();
+                 for ( var key in form ) {
+                     formData.append(key, form[key]);
+                 }
+                 console.log(form);
+                 fetch("/Course/Activity/Save", {
+                      method: 'POST',
+                      body: formData,
+                 });
+             });
+             $('#showDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+             $('#dueDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+             });
+             $('.download').click(function () {
+                 fetch('/Course/Activity/GetFile?id=' + $(this).data('id'))
+                  .then( res => res.blob() )
+                  .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = $(this).data('name');
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  })
+             })
+         }
+      </script>
+   </body>
+</html>

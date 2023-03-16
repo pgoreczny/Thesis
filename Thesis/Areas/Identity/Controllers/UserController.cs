@@ -12,24 +12,28 @@ namespace Thesis.Areas.Identity.Controllers
     [Area("Identity")]
     public class UserController : Controller
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserService userService;
-        private readonly SignInManager<IdentityUser> signInManager;
-        public UserController(UserManager<IdentityUser> userManager, UserService userService, RoleManager<IdentityRole> roleManager, SignInManager<IdentityUser> signInManager)
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private List<Breadcrumb> crumbs = new List<Breadcrumb>();
+        public UserController(UserManager<ApplicationUser> userManager, UserService userService, RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager)
         {
             this.userManager = userManager;
             this.userService = userService;
             this.roleManager = roleManager;
             this.signInManager = signInManager;
+            crumbs.Add(new Breadcrumb { text = "Home", url = "/" });
         }
 
         [Authorize(Policy = Claims.Users.UserList)]
         public IActionResult UserList()
         {
-            List<IdentityUser> identityUsers = userManager.Users.ToList();
-            List<UserModel> users = new List<UserModel>(identityUsers.Count);
-            foreach (IdentityUser user in identityUsers)
+            crumbs.Add(new Breadcrumb { text = "users", current = true });
+            ViewBag.crumbs = crumbs;
+            List<ApplicationUser> ApplicationUsers = userManager.Users.ToList();
+            List<UserModel> users = new List<UserModel>(ApplicationUsers.Count);
+            foreach (ApplicationUser user in ApplicationUsers)
             {
                 users.Add(userService.GetUserModel(user));
             }
@@ -38,9 +42,12 @@ namespace Thesis.Areas.Identity.Controllers
         [Authorize(Policy = Claims.Users.UserEdit)]
         public IActionResult editUser([FromQuery(Name = "id")] string id)
         {
-            IdentityUser identityUser = userManager.Users.Where(user => user.Id == id).FirstOrDefault();
-            UserModel user = userService.GetUserModel(identityUser);
-            IList<string> userroles = userManager.GetRolesAsync(identityUser).Result;
+            crumbs.Add(new Breadcrumb { text = "Users", url = "/Identity/User/UserList" });
+            crumbs.Add(new Breadcrumb { text = "Edit user", current = true });
+            ViewBag.crumbs = crumbs;
+            ApplicationUser ApplicationUser = userManager.Users.Where(user => user.Id == id).FirstOrDefault();
+            UserModel user = userService.GetUserModel(ApplicationUser);
+            IList<string> userroles = userManager.GetRolesAsync(ApplicationUser).Result;
             List<Role> roles = roleManager.Roles.Select(role => new Role { name = role.Name, isOn = userroles.Contains(role.Name) }).ToList();
             return View("UserEdit", (user, roles));
         }
@@ -48,9 +55,10 @@ namespace Thesis.Areas.Identity.Controllers
         [Authorize(Policy = Claims.Basic.IsRegistered)]
         public IActionResult myProfile()
         {
-            IdentityUser identityUser = userService.getCurrentUser().Result;
-            UserModel user = userService.GetUserModel(identityUser);
-            IList<string> userroles = userManager.GetRolesAsync(identityUser).Result;
+
+            ApplicationUser ApplicationUser = userService.getCurrentUser().Result;
+            UserModel user = userService.GetUserModel(ApplicationUser);
+            IList<string> userroles = userManager.GetRolesAsync(ApplicationUser).Result;
             List<Role> roles = roleManager.Roles.Select(role => new Role { name = role.Name, isOn = userroles.Contains(role.Name) }).ToList();
             return View("userProfile", (user, roles));
         }
@@ -58,8 +66,9 @@ namespace Thesis.Areas.Identity.Controllers
         [Authorize(Policy = Claims.Basic.IsRegistered)]
         public IActionResult getUserInfo([FromQuery(Name = "id")] string id)
         {
-            IdentityUser identityUser = userManager.Users.Where(user => user.Id == id).FirstOrDefault();
-            UserModel user = userService.GetUserModel(identityUser);
+            crumbs.Add(new Breadcrumb { text = "User profile", current = true});
+            ApplicationUser ApplicationUser = userManager.Users.Where(user => user.Id == id).FirstOrDefault();
+            UserModel user = userService.GetUserModel(ApplicationUser);
             return View("UserInfo", user);
         }
 
@@ -67,7 +76,7 @@ namespace Thesis.Areas.Identity.Controllers
         [HttpPost]
         public async Task<IActionResult> save([FromForm] UserModel userModel)
         {
-            IdentityUser user = userService.getUserById(userModel.id).Result;
+            ApplicationUser user = userService.getUserById(userModel.id).Result;
             if (user != null)
             {
                 user.Email = userModel.email;
@@ -83,7 +92,7 @@ namespace Thesis.Areas.Identity.Controllers
 
         public async Task<IActionResult> saveProfile([FromForm] UserModel userModel)
         {
-            IdentityUser user = userService.getUserById(userModel.id).Result;
+            ApplicationUser user = userService.getUserById(userModel.id).Result;
             if (user != null)
             {
                 user.Email = userModel.email;
@@ -101,7 +110,7 @@ namespace Thesis.Areas.Identity.Controllers
         [HttpPost]
         public OperationResult changePassword([FromBody]PasswordModel data)
         {
-            IdentityUser user = userService.getUserById(data.userId).Result;
+            ApplicationUser user = userService.getUserById(data.userId).Result;
             if (user != null && User.FindFirstValue(ClaimTypes.Email) == user.Email)
             {
                 IdentityResult result = userManager.ChangePasswordAsync(user, data.currentPassword, data.password).Result;
@@ -122,10 +131,10 @@ namespace Thesis.Areas.Identity.Controllers
         [HttpDelete]
         public OperationResult delete([FromBody] List<string> userIds)
         {
-            List<IdentityUser> users = userIds.Select(id => userService.getUserById(id).Result).ToList();
+            List<ApplicationUser> users = userIds.Select(id => userService.getUserById(id).Result).ToList();
             if (!users.Contains(null))
             {
-                foreach (IdentityUser user in users)
+                foreach (ApplicationUser user in users)
                 {
                     IdentityResult result = userManager.DeleteAsync(user).Result;
                     if (!result.Succeeded)
