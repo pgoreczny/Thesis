@@ -1,0 +1,15 @@
+﻿@using Thesis.Models
+@model Course
+
+<title>Join @Model.name</title>
+
+<div class="container">
+    <h2>
+        Are you sure you want to leave this course?
+    </h2>
+    <div>
+        @Model.name
+    </div>
+    <button onclick="location.href='/Course/Feed/leave?id=@Model.id';" id="join" class="btn btn-danger">Leave</button>
+    <button onclick="location.href='/Course/Feed/availableCourses';" id="resign" class="btn">Don't leave</button>
+</div>

@@ -1,0 +1,18 @@
+﻿@using Thesis.Models
+@model Course
+
+<title>Join @Model.name</title>
+
+<div class="container">
+    <h2>
+        Do you want to join this course?
+    </h2>
+    <div>
+        @Model.description
+    </div>
+    <br>
+    Price: @Model.price@await Component.InvokeAsync("Currency")
+    <br>
+    <button onclick="location.href='/Course/Feed/join?id=@Model.id';" id="join" class="btn btn-success">Join</button>
+    <button onclick="location.href='/Course/Feed/availableCourses';" id="resign" class="btn btn-danger">Don't join'</button>
+</div>

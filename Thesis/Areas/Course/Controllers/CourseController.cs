@@ -79,12 +79,11 @@ namespace Thesis.Areas.Course.Controllers
         [HttpPost]
         public OperationResult approveUser([FromQuery] string id, [FromQuery] int courseId)
         {
-            ApplicationUser user = userService.getUserById(id).Result;
-            if (user != null)
+            CourseApplicationUser join = courseService.getJoin(courseId, id);
+            if (join.ApplicationUserId != "")
             {
-                user.CourseApplicationUsers.Find(course => course.CourseId == courseId).status = enCourseUserStatus.approved;
-                IdentityResult result = userService.updateUser(user);
-                return new OperationResult { success = result.Succeeded, text = result.Succeeded ? "User approved" : result.Errors.FirstOrDefault().Description };
+                string result = courseService.updateConnection(courseId, id, enCourseUserStatus.approved);
+                return new OperationResult { success = string.IsNullOrEmpty(result), text = string.IsNullOrEmpty(result) ? "User approved" : result };
             }
             return new OperationResult { success = false, text = "User couldn't be found" };
         }
@@ -93,12 +92,11 @@ namespace Thesis.Areas.Course.Controllers
         [HttpPost]
         public OperationResult denyUser([FromQuery] string id, [FromQuery] int courseId)
         {
-            ApplicationUser user = userService.getUserById(id).Result;
-            if (user != null)
+            CourseApplicationUser join = courseService.getJoin(courseId, id);
+            if (join.ApplicationUserId != "")
             {
-                user.CourseApplicationUsers.Find(course => course.CourseId == courseId).status = enCourseUserStatus.denied;
-                IdentityResult result = userService.updateUser(user);
-                return new OperationResult { success = result.Succeeded, text = result.Succeeded ? "User approved" : result.Errors.FirstOrDefault().Description };
+                string result = courseService.updateConnection(courseId, id, enCourseUserStatus.denied);
+                return new OperationResult { success = string.IsNullOrEmpty(result), text = string.IsNullOrEmpty(result) ? "User denied" : result };
             }
             return new OperationResult { success = false, text = "User couldn't be found" };
         }

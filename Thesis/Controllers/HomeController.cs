@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using System.Diagnostics;
-using System.Security.Claims;
 using Thesis.database;
 using Thesis.Models;
 using Thesis.Services;
@@ -53,6 +49,11 @@ namespace Thesis.Controllers
         public async Task<IActionResult> confidentialAsync()
         {
             return View("confidential");
+        }
+
+        public IActionResult showError()
+        {
+            return View("Error");
         }
     }
 }

@@ -71,6 +71,7 @@ builder.Services.AddScoped<UserService, UserService>();
 builder.Services.AddScoped<CourseService, CourseService>();
 builder.Services.AddScoped<ActivityService, ActivityService>();
 builder.Services.AddScoped<FileService, FileService>();
+builder.Services.AddScoped<PaymentService, PaymentService>();
 
 builder.Services.Configure<RequestLocalizationOptions>(opt =>
 {

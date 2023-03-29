@@ -13,7 +13,7 @@ namespace Thesis.database
 
         }
 
-        public CoursesDBContext(DbContextOptions<CoursesDBContext> options): base(options)
+        public CoursesDBContext(DbContextOptions<CoursesDBContext> options) : base(options)
         {
         }
         // Entities        
@@ -23,7 +23,13 @@ namespace Thesis.database
         public DbSet<Activity> activities { get; set; }
         public DbSet<File> files { get; set; }
         public DbSet<Answer> answers { get; set; }
+        public DbSet<Currency> currencies { get; set; }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<decimal>()
+                .HavePrecision(9, 2);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

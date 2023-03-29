@@ -2,12 +2,13 @@
 @model (Course, List<Activity>)
 <htmL>
    <body>
-      <form id="editForm" data-user="@Model.Item1.id" method="post" action="/Course/Course/Save">
+      <form id="editForm" data-course="@Model.Item1.id" method="post" action="/Course/Course/Save">
          <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
          @await Component.InvokeAsync("Input", ("name", "Name", Model.Item1.name))
          @await Component.InvokeAsync("TextArea", ("description", "Description", Model.Item1.description))
          @await Component.InvokeAsync("DateInput", ("startDate", "Start date", Model.Item1.startDate))
          @await Component.InvokeAsync("DateInput", ("endDate", "End date", Model.Item1.endDate))
+         @await Component.InvokeAsync("Input", ("price", "Price", Model.Item1.price))
          <button type="submit" class="btn btn-primary">Submit</button>
       </form>
       <hr />
@@ -42,12 +43,39 @@
                     </table>
             }
        }
+       <p>
+  <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+    All students
+  </a>
+</p>
+<div class="collapse" id="collapseExample">
+  <h2>All students</h2>
+                    <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>e-mail</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    @foreach (CourseApplicationUser user in Model.Item1.CourseApplicationUsers)
+                {
+                        <tr>
+                            <td>@user.applicationUser.UserName</td>
+                            <td>@user.applicationUser.Email</td>
+                            <td>
+                                @await Component.InvokeAsync("CourseJoinStatus", user.status)
+                            </td>
+                        </tr>
+                }
+                    </table>
+</div>
       </partial>
       <script type="text/javascript">
          window.onload = function() {
              $('.userApprove').click(function () {
-                fetch('/Course/Course/ApproveUser?id=' + $(this).data('id'), {
-                method: 'Delete',
+                fetch('/Course/Course/ApproveUser?id=' + $(this).data('id') + "&courseId="+$('#editForm').data('course'), {
+                method: 'Post',
             })
             .then(function (a) {
                 return a.json();
@@ -76,7 +104,7 @@
             )
              })
              $('.userDeny').click(function () {
-                fetch('/Course/Course/DenyUser?id=' + $(this).data('id'), {
+                fetch('/Course/Course/DenyUser?id=' + $(this).data('id') + "&courseId="+$('#editForm').data('course'), {
                 method: 'Post',
             })
             .then(function (a) {

@@ -42,6 +42,9 @@
             <th>
                 Updated by
             </th>
+            <th>
+                Price
+            </th>
         </tr>
     </thead>
     @foreach (Thesis.Models.Course course in Model)
@@ -80,6 +83,9 @@
             </td>
             <td>
                 @course.updatedBy.UserName
+            </td>
+            <td>
+                @course.price
             </td>
         </tr>
     }

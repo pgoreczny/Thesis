@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Areas.Identity.Models;
+using Thesis.database;
 using Thesis.Models;
 
 namespace Thesis.Services
@@ -9,11 +11,13 @@ namespace Thesis.Services
     public class UserService
     {
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly CoursesDBContext context;
         private readonly IHttpContextAccessor accessor;
-        public UserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor accessor)
+        public UserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor accessor, CoursesDBContext context)
         {
             this.userManager = userManager;
             this.accessor = accessor;
+            this.context = context;
         }
 
         public async Task<ApplicationUser> getCurrentUser()
@@ -37,6 +41,15 @@ namespace Thesis.Services
                 return null;
             }
         }
+
+        public ApplicationUser getUserWithCourses(string userId)
+        {
+            return context.Users
+                .Where(user => user.Id == userId)
+                .Include(user => user.CourseApplicationUsers)
+                .FirstOrDefault();
+        }
+
         public async Task<ApplicationUser> getUserByName(string name)
         {
             return await userManager.FindByNameAsync(name);
