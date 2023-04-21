@@ -1,0 +1,93 @@
+﻿@model (int activity, int course)
+<!DOCTYPE html>
+<!--
+	Copyright (c) 2014-2023, CKSource Holding sp. z o.o. All rights reserved.
+	This file is licensed under the terms of the MIT License (see LICENSE.md).
+-->
+
+<html lang="en" dir="ltr">
+<head>
+	<title>CKEditor 5 DecoupledDocumentEditor build</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="w.idth=device-width, initial-scale=1">
+	<link rel="icon" type="image/png" href="https://c.cksource.com/a/1/logos/ckeditor5.png">
+	<link rel="stylesheet" href="~/css/wysiwyg.css" asp-append-version="true" />
+</head>
+<body data-editor="DecoupledDocumentEditor" data-collaboration="false" data-revision-history="false">
+	<main>
+		<div class="message">
+			<div class="centered">
+				<h2>Enter text</h2>
+			</div>
+		</div>
+		<div class="centered">
+			<div class="row">
+				<div class="document-editor__toolbar"></div>
+			</div>
+			<div class="row row-editor">
+				<div data-course="@Model.course" id="save" style="background-color: green" onclick="save(@Model.activity)" class="btn btn-success">Save</div>
+				<div class="editor-container">
+					<div class="editor">
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</main>
+	<footer>
+	</footer>
+	<script src="~/js/ckeditor.js"></script>
+	<script>
+		DecoupledDocumentEditor
+			.create(document.querySelector('.editor'), {
+
+				licenseKey: '',
+
+
+
+			})
+			.then(editor => {
+				window.editor = editor;
+
+				// Set a custom container for the toolbar.
+				document.querySelector('.document-editor__toolbar').appendChild(editor.ui.view.toolbar.element);
+				document.querySelector('.ck-toolbar').classList.add('ck-reset_all');
+			})
+			.catch(error => {
+				Toastify({
+					text: error,
+					duration: 3000,
+					style: {
+						background: "red"
+					}
+				}).showToast();
+			});
+		function save(id) {
+			const content = $('.editor').html();
+			fetch("/Course/Feed/saveAnswer?activity=" + id, {
+				method: 'POST',
+				headers: {
+						Accept: 'application.json',
+						'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(content),
+			})
+				.then(function (a) {
+					console.log(a);
+				})
+				.then(function () {
+					Toastify({
+						text: "Answer saved successfully",
+						duration: 3000,
+						style: {
+							background: "green"
+						}
+					}).showToast();
+						setTimeout(function () {
+						location.href = "/course/feed/feed?id=" + $('#save').data('course');
+						}, 1000);
+				})
+		}
+	</script>
+</body>
+</html>

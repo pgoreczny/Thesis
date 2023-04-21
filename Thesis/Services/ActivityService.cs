@@ -18,6 +18,8 @@ namespace Thesis.Services
         public Activity getActivityById(int id)
         {
             List<Activity> activities = context.activities
+                .Include(activity => activity.answers)
+                .ThenInclude(answer => answer.student)
                 .Where(activity => activity.id == id)
                 .ToList();
             if (activities.Count == 0)

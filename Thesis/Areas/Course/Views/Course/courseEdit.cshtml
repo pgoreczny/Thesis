@@ -3,13 +3,13 @@
 <htmL>
    <body>
       <form id="editForm" data-course="@Model.Item1.id" method="post" action="/Course/Course/Save">
+         <div id="submitForm" class="btn btn-primary">Save</div>
          <input name="id" style="visibility: hidden" id = "id" value = "@Model.Item1.id" />
          @await Component.InvokeAsync("Input", ("name", "Name", Model.Item1.name))
          @await Component.InvokeAsync("TextArea", ("description", "Description", Model.Item1.description))
          @await Component.InvokeAsync("DateInput", ("startDate", "Start date", Model.Item1.startDate))
          @await Component.InvokeAsync("DateInput", ("endDate", "End date", Model.Item1.endDate))
-         @await Component.InvokeAsync("Input", ("price", "Price", Model.Item1.price))
-         <button type="submit" class="btn btn-primary">Submit</button>
+         @await Component.InvokeAsync("Input", ("price", "Price", Model.Item1.price.ToString()))
       </form>
       <hr />
       <partial>
@@ -73,6 +73,38 @@
       </partial>
       <script type="text/javascript">
          window.onload = function() {
+            $('#submitForm').click(function(e) {
+                 e.stopPropagation();
+                 var form = Object.fromEntries(new FormData($('#editForm')[0]));
+                 form["startDate"] = formatDate($('#startDate').val());
+                 form["endDate"] = formatDate($('#endDate').val());
+
+                 var formData = new FormData();
+                 for ( var key in form ) {
+                     formData.append(key, form[key]);
+                 }
+                 fetch("/Course/Course/Save", {
+                      method: 'POST',
+                      body: formData,
+                 })
+                 .then(function (a) {
+                return a.json();
+                })
+                .then(function () {
+                    Toastify({
+                        text: "Course saved successfully",
+                        duration: 3000,
+                        style: {
+                            background: "green"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    }
+                })
+             });
              $('.userApprove').click(function () {
                 fetch('/Course/Course/ApproveUser?id=' + $(this).data('id') + "&courseId="+$('#editForm').data('course'), {
                 method: 'Post',

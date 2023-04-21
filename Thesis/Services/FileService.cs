@@ -12,6 +12,27 @@ namespace Thesis.Services
         {
             this.context = context;
         }
+        public Models.File makeFile(string content, string name, enConnectionType bindingType, int binding)
+        {
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(name);
+            string savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/files", fileName);
+            try
+            {
+                using (StreamWriter streamWriter = new StreamWriter(savePath))
+                {
+                    streamWriter.Write(content);
+                    Models.File fileModel = new Models.File { name = fileName, path = savePath, showName = name, bindingType = bindingType, binding = binding };
+                    context.files.Add(fileModel);
+                    context.SaveChanges();
+                    return fileModel;
+            }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public Models.File saveFile(IFormFile file, enConnectionType bindingType, int binding)
         {
             if (file != null)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis.database;
 
@@ -11,9 +12,11 @@ using Thesis.database;
 namespace Thesis.Migrations
 {
     [DbContext(typeof(CoursesDBContext))]
-    partial class CoursesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230419094436_answers2")]
+    partial class answers2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,7 +227,7 @@ namespace Thesis.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("activityId")
+                    b.Property<int?>("Activityid")
                         .HasColumnType("int");
 
                     b.Property<bool>("editable")
@@ -244,7 +247,7 @@ namespace Thesis.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("activityId");
+                    b.HasIndex("Activityid");
 
                     b.HasIndex("fileId");
 
@@ -546,11 +549,9 @@ namespace Thesis.Migrations
 
             modelBuilder.Entity("Thesis.Models.Answer", b =>
                 {
-                    b.HasOne("Thesis.Models.Activity", "activity")
+                    b.HasOne("Thesis.Models.Activity", null)
                         .WithMany("answers")
-                        .HasForeignKey("activityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Activityid");
 
                     b.HasOne("Thesis.Models.File", "file")
                         .WithMany()
@@ -559,8 +560,6 @@ namespace Thesis.Migrations
                     b.HasOne("Thesis.Models.ApplicationUser", "student")
                         .WithMany()
                         .HasForeignKey("studentId");
-
-                    b.Navigation("activity");
 
                     b.Navigation("file");
 

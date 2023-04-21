@@ -88,7 +88,7 @@ namespace Thesis.Areas.Course.Controllers
             return LocalRedirect("/Course/Activity/edit?id=" + id);
         }
 
-        [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public FileResult getFile(Guid id)
         {
             Models.File file = fileService.getFileModel(id);

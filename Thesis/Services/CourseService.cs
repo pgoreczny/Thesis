@@ -8,10 +8,12 @@ namespace Thesis.Services
     {
         private readonly CoursesDBContext context;
         private readonly UserService userService;
-        public CourseService(CoursesDBContext context, UserService userService)
+        private readonly FileService fileService;
+        public CourseService(CoursesDBContext context, UserService userService, FileService fileService)
         {
             this.context = context;
             this.userService = userService;
+            this.fileService = fileService;
         }
 
         public void addUser(CourseApplicationUser user)
@@ -59,6 +61,25 @@ namespace Thesis.Services
             if (courses.Count == 0)
             {
                 return new Course();
+            }
+            return courses[0];
+        }
+
+        public Course getCourseByIdWithDependencies(int id)
+        {
+            List<Course> courses = context.courses
+                .Include(course => course.activities)
+                    .ThenInclude(activity => activity.answers)
+                .Include(course => course.CourseApplicationUsers)
+                    .ThenInclude(join => join.applicationUser)
+                .Where(course => course.id == id).ToList();
+            if (courses.Count == 0)
+            {
+                return new Course();
+            }
+            foreach (Activity activity in courses[0].activities)
+            {
+                activity.files = fileService.getFiles(enConnectionType.activity, activity.id);
             }
             return courses[0];
         }

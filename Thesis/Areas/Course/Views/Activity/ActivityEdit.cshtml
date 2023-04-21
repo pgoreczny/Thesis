@@ -27,16 +27,8 @@
 
       @if (Model.id > 0)
          {
+             @await Component.InvokeAsync("UploadFile", ("/Course/Activity/SaveFile?id=" + @Model.id.ToString(), "Add file", ""))
              <hr />
-             <form class="col-xs-12" method="post" action="/Course/Activity/SaveFile?id=@Model.id" enctype="multipart/form-data">
-                <div class="form-group">
-                    <input type="file" class="form-control" name="file" />
-                </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary col-xs-12">Add file</button>
-                </div>
-            </form>
             <table class="table table-striped .table-responsive">
                 <thead>
                     <tr>
@@ -47,7 +39,7 @@
                 @foreach (File file in Model.files)
                 {
                     <tr>
-                        <td>@file.name</td>
+                        <td>@file.showName</td>
                         <td data-name="@file.showName" data-id="@file.Id" class="download"><i class="bi bi-download"></i></td>
                     </tr>
                 }
@@ -61,17 +53,30 @@
             <table class="table table-striped .table-responsive">
                 <thead>
                     <tr>
-                        <th>Filename</th>
+                        <th>Student</th>
+                        <th>Entry date</th>
+                        <th>Check on-line</th>
                         <th>Download</th>
+                        <th>Checked</th>
                     </tr>
                 </thead>
-                @foreach (File file in Model.files)
+                <tbody>
+                @foreach (Answer answer in Model.answers)
                 {
                     <tr>
-                        <td>abc</td>
-                        <td data-name="@file.showName" data-id="@file.Id" class="download"><i class="bi bi-download"></i></td>
+                        <td>@answer.student.UserName</td>
+                        <th>@await Component.InvokeAsync("DateLabel", answer.entryDate)</th>
+                        <td>//todo</td>
+                        <td data-id="@answer.fileId" class="download"><i class="bi bi-download"></i></td>
+                        <td>
+                            @if (answer.isChecked)
+                            {
+                                <i style="color: green" class="bi bi-check"></i>
+                            }
+                        </td>
                     </tr>
                 }
+                </tbody>
             </table>
         }
       <script type="text/javascript">
@@ -93,7 +98,20 @@
                  fetch("/Course/Activity/Save", {
                       method: 'POST',
                       body: formData,
-                 });
+                 }).then(function () {
+                    Toastify({
+                        text: "Activity saved successfully",
+                        duration: 3000,
+                        style: {
+                            background: "green"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    }
+                });
              });
              $('#showDate').datepicker({
                 uiLibrary: 'bootstrap5',

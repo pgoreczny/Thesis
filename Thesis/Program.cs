@@ -66,12 +66,12 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<MenuService, MenuService>();
-
 builder.Services.AddScoped<UserService, UserService>();
 builder.Services.AddScoped<CourseService, CourseService>();
 builder.Services.AddScoped<ActivityService, ActivityService>();
 builder.Services.AddScoped<FileService, FileService>();
 builder.Services.AddScoped<PaymentService, PaymentService>();
+builder.Services.AddScoped<AnswerService, AnswerService>();
 
 builder.Services.Configure<RequestLocalizationOptions>(opt =>
 {

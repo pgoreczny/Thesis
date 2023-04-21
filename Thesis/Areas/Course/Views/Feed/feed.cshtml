@@ -1,1 +1,10 @@
-﻿
+﻿@using Thesis.Models
+@model Course
+<h1 class="display-5 fw-bold">@Model.name</h1>
+<h3 class="col-md-12 fs-4">@Model.description</h3>
+
+@foreach (Activity activity in Model.activities)
+{
+    <hr />
+    @await Component.InvokeAsync("FeedActivity", activity)
+}

@@ -1,0 +1,96 @@
+﻿@using Thesis.Models
+@model (Activity activity, Answer answer)
+
+<div>
+    @if (Model.activity.activityType == enActivityType.task)
+    {
+        <i class="bi bi-pencil-square" style="font-size: 2em;"></i>
+        <h3>Due: <span class="badge bg-secondary">@await Component.InvokeAsync("DateLabel", Model.activity.dueDate)</span></h3>
+    }
+    else
+    {
+        <i class="bi bi-book" style="font-size: 2em;"></i>
+    }
+
+    <h3>@Model.activity.title</h3>
+    <p>@Model.activity.text</p>
+    @if (Model.activity.files != null && Model.activity.files.Count > 0)
+    {
+        <table class="table table-striped .table-responsive">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            @foreach (File file in Model.activity.files)
+            {
+                <tr>
+                    <td>@file.showName</td>
+                    <td data-name="@file.showName" data-id="@file.Id" class="download"><i style="cursor: pointer" class="bi bi-download"></i></td>
+                </tr>
+            }
+        </table>
+    }
+    @if (Model.activity.activityType == enActivityType.task)
+    {
+        <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapse_@Model.activity.id" role="button" aria-expanded="false" aria-controls="collapse_@Model.activity.id">
+            Answer
+        </a>
+        <div class="collapse" id="collapse_@Model.activity.id">
+            @if (Model.answer != null)
+            {
+                <table class="table table-striped .table-responsive">
+                    <thead>
+                        <tr>
+                            <th>Entry date</th>
+                            <th>Download</th>
+                            <th>Checked</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>@await Component.InvokeAsync("DateLabel", Model.answer.entryDate)</td>
+                            <td style="cursor: pointer" data-id="@Model.answer.fileId" class="download"><i class="bi bi-download"></i></td>
+                            <td>
+                                @if (Model.answer.isChecked)
+                                {
+                                    <i style="color: green" class="bi bi-check"></i>
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+            @if (Model.activity.allowFile)
+            {
+                @await Component.InvokeAsync("UploadFile", ("/Course/Feed/AddAnswer?activity=" + @Model.activity.id.ToString(), "Answer with file", ""))
+            }
+            @if (Model.activity.allowText)
+            {
+                <br>
+                <button class="btn btn-outline-secondary" onclick="location.href='/Course/Feed/WriteAnswer?activity=@Model.activity.id.ToString()';">Answer with text editor</button>
+            }
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    window.onload = function () {
+        $('.download').click(function () {
+            fetch('/Course/Activity/GetFile?id=' + $(this).data('id'))
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = $(this).data('name');
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+        })
+    }
+</script>

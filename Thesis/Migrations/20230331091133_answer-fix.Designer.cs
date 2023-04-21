@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis.database;
 
@@ -11,9 +12,11 @@ using Thesis.database;
 namespace Thesis.Migrations
 {
     [DbContext(typeof(CoursesDBContext))]
-    partial class CoursesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230331091133_answer-fix")]
+    partial class answerfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,29 +227,25 @@ namespace Thesis.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("activityId")
+                    b.Property<int?>("Activityid")
                         .HasColumnType("int");
-
-                    b.Property<bool>("editable")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime>("entryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("fileId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("isChecked")
                         .HasColumnType("bit");
+
+                    b.Property<string>("path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("studentId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("id");
 
-                    b.HasIndex("activityId");
-
-                    b.HasIndex("fileId");
+                    b.HasIndex("Activityid");
 
                     b.HasIndex("studentId");
 
@@ -546,23 +545,13 @@ namespace Thesis.Migrations
 
             modelBuilder.Entity("Thesis.Models.Answer", b =>
                 {
-                    b.HasOne("Thesis.Models.Activity", "activity")
+                    b.HasOne("Thesis.Models.Activity", null)
                         .WithMany("answers")
-                        .HasForeignKey("activityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Thesis.Models.File", "file")
-                        .WithMany()
-                        .HasForeignKey("fileId");
+                        .HasForeignKey("Activityid");
 
                     b.HasOne("Thesis.Models.ApplicationUser", "student")
                         .WithMany()
                         .HasForeignKey("studentId");
-
-                    b.Navigation("activity");
-
-                    b.Navigation("file");
 
                     b.Navigation("student");
                 });

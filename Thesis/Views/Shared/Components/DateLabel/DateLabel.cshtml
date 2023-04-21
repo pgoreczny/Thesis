@@ -1,0 +1,12 @@
+﻿@model DateTime
+
+<div class="mb-3">
+    @if (Model.Year < 2000)
+    {
+        <label></label>
+    }
+    else
+    {
+        <span>@Model.ToString("dd-MM-yyyy")</span>
+    }
+</div>

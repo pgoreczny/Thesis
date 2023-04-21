@@ -12,14 +12,18 @@ namespace Thesis.Areas.Course.Controllers
         private readonly CourseService courseService;
         private readonly ActivityService activityService;
         private readonly UserService userService;
+        private readonly FileService fileService;
+        private readonly AnswerService answerService;
         private List<Breadcrumb> crumbs = new List<Breadcrumb>();
-        public FeedController(CourseService courseService, ActivityService activityService, UserService userService)
+        public FeedController(CourseService courseService, ActivityService activityService, UserService userService, FileService fileService, AnswerService answerService)
         {
             this.courseService = courseService;
             this.activityService = activityService;
             this.userService = userService;
+            this.answerService = answerService;
             crumbs.Add(new Breadcrumb { text = "Home", url = "/" });
             crumbs.Add(new Breadcrumb { text = "Available courses", url = "/course/feed/availableCourses" });
+            this.fileService = fileService;
         }
 
         [Authorize(Policy = Claims.UserCourses.SeeCourses)]
@@ -96,6 +100,75 @@ namespace Thesis.Areas.Course.Controllers
             }
             courseService.leaveCourse(user.Id, id);
             return LocalRedirect("/Course/Feed/availableCourses");
+        }
+
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
+        public IActionResult feed([FromQuery] int id)
+        {
+            ApplicationUser user = userService.getCurrentUser().Result;
+            if (!courseService.checkIfExists(id) || !courseService.checkCourseAccess(user, id))
+            {
+                return LocalRedirect("/Home/showError");
+            }
+            Models.Course course = courseService.getCourseByIdWithDependencies(id);
+            crumbs.Add(new Breadcrumb { text = course.name, current = true });
+            ViewBag.crumbs = crumbs;
+            return View("feed", course);
+        }
+
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
+        public IActionResult AddAnswer(IFormFile file, [FromQuery] int activity)
+        {
+            Answer answer = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            if (answer == null)
+            {
+                answer = new Answer { entryDate = DateTime.Now, editable = false, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity };
+                answer = answerService.addAnswer(answer);
+            }
+            else
+            {
+                answer.entryDate = DateTime.Now;
+                answer.isChecked = false;
+                answer.editable = false;
+                answerService.updateAnswer(answer);
+            }
+            Models.File fileModel = fileService.saveFile(file, enConnectionType.answer, answer.id);
+            if (fileModel != null)
+            {
+                answerService.addFile(fileModel, answer.id);
+            }
+            return LocalRedirect("/Course/Feed/feed?id=" + activityService.getActivityById(activity).courseId);
+        }
+
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
+        public OperationResult SaveAnswer([FromBody] string content, [FromQuery] int activity)
+        {
+            Answer answer = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            string fileName = activityService.getActivityById(activity).title + "-" + userService.getCurrentUser().Result.UserName + ".html";
+            if (answer == null)
+            {
+                answer = new Answer { entryDate = DateTime.Now, editable = true, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity };
+                answer = answerService.addAnswer(answer);
+            }
+            else
+            {
+                answer.entryDate = DateTime.Now;
+                answer.isChecked = false;
+                answer.editable = false;
+                answerService.updateAnswer(answer);
+            }
+            Models.File fileModel = fileService.makeFile(content, fileName, enConnectionType.answer, answer.id);
+            if (fileModel != null)
+            {
+                answerService.addFile(fileModel, answer.id);
+            }
+            return new OperationResult { success = true, text = "Answer saved successfully" };
+        }
+
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
+        public IActionResult WriteAnswer([FromQuery] int activity)
+        {
+            return View("AnswerEditor", (activity, activityService.getActivityById(activity).courseId));
         }
     }
 }
