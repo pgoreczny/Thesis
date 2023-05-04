@@ -11,5 +11,8 @@
         public bool editable { get; set; }
         public Activity activity { get; set; }
         public int activityId { get; set; }
+        public List<ReviewComment> comments { get; set; }
+
+        public int version { get; set; }
     }
 }

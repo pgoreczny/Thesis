@@ -1,0 +1,104 @@
+﻿@using Thesis.Models
+@model (Answer answer, File answerFile, ReviewComment comment)
+<button data-comment="@Model.comment.id" data-answer="@Model.answer.id" id="end" class="btn btn-success">End review</button>
+<button data-comment="@Model.comment.id" data-activity="@Model.answer.activityId" id="pause" class="btn btn-warning">Pause review</button>
+<br />
+<br />
+<button data-id="@Model.answer.fileId" class="download btn btn-primary">Download answer<i class="bi bi-download"></i></button>
+<br />
+<h4>Write your comments</h4>
+<div>
+    <textarea id="comment" style="width: 80%">@Model.comment.comment</textarea>
+</div>
+
+
+<script type="text/javascript">
+    window.onload = function () {
+        $('#end').click(function () {
+            const content = $('#comment').val();
+            const answer = $(this).data('answer');
+            fetch("/Course/Grading/saveSimpleComment?id=" + $(this).data('comment'), {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(content),
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(() => {
+                            location.href = "/course/grading/submitReview?answerId=" + answer;
+                        }, 1000);
+                    }
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        })
+        $('#pause').click(function () {
+            const content = $('#comment').val();
+            const activity = $(this).data('activity');
+            fetch("/Course/Grading/saveSimpleComment?id=" + $(this).data('comment'), {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(content),
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(() => {
+                            location.href = "/course/activity/edit?id=" + activity;
+                        }, 1000);
+                    }
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        })
+        $('.download').click(function () {
+            fetch('/Course/Activity/GetFile?id=' + $(this).data('id'))
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = $(this).data('name');
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+        })
+    }
+</script>

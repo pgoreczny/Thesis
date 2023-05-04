@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis.database;
 
@@ -11,9 +12,11 @@ using Thesis.database;
 namespace Thesis.Migrations
 {
     [DbContext(typeof(CoursesDBContext))]
-    partial class CoursesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230427152848_comment-fix")]
+    partial class commentfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,9 +244,6 @@ namespace Thesis.Migrations
 
                     b.Property<string>("studentId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("version")
-                        .HasColumnType("int");
 
                     b.HasKey("id");
 

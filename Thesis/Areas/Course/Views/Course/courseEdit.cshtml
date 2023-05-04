@@ -87,9 +87,6 @@
                       method: 'POST',
                       body: formData,
                  })
-                 .then(function (a) {
-                return a.json();
-                })
                 .then(function () {
                     Toastify({
                         text: "Course saved successfully",
@@ -98,11 +95,6 @@
                             background: "green"
                         }
                     }).showToast();
-                    if (data.success) {
-                        setTimeout(function () {
-                            location.reload();
-                        }, 1000);
-                    }
                 })
              });
              $('.userApprove').click(function () {

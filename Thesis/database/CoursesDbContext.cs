@@ -24,6 +24,7 @@ namespace Thesis.database
         public DbSet<File> files { get; set; }
         public DbSet<Answer> answers { get; set; }
         public DbSet<Currency> currencies { get; set; }
+        public DbSet<ReviewComment> reviewComments { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -58,6 +59,11 @@ namespace Thesis.database
                 .WithMany(s => s.CourseApplicationUsers)
                 .HasForeignKey(c => c.ApplicationUserId);
 
+
+            modelBuilder.Entity<Answer>()
+                .HasMany(answer => answer.comments)
+                .WithOne(comment => comment.answer)
+                .HasForeignKey(comment => comment.AnswerId);
 
             modelBuilder.Entity<CourseApplicationUser>()
                 .HasOne(c => c.course)

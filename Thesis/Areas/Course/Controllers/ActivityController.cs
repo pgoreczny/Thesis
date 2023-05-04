@@ -63,7 +63,7 @@ namespace Thesis.Areas.Course.Controllers
 
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
         [HttpPost]
-        public IActionResult save([FromForm] Activity activity)
+        public OperationResult save([FromForm] Activity activity)
         {
             if (activity.createdBy == null)
             {
@@ -74,7 +74,8 @@ namespace Thesis.Areas.Course.Controllers
             activity.updateDate = DateTime.Now;
             activity.course = courseService.getCourseById(activity.courseId);
             int id  = activityService.saveActivity(activity);
-            return LocalRedirect("/course/Activity/edit?id=" + id);
+
+            return new OperationResult { success = true, text = "Activity saved successfully", data = new List<string> { "/course/Activity/edit?id=" + id } };
         }
 
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]

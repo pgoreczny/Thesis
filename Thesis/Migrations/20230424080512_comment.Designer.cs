@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis.database;
 
@@ -11,9 +12,11 @@ using Thesis.database;
 namespace Thesis.Migrations
 {
     [DbContext(typeof(CoursesDBContext))]
-    partial class CoursesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230424080512_comment")]
+    partial class comment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,9 +244,6 @@ namespace Thesis.Migrations
 
                     b.Property<string>("studentId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("version")
-                        .HasColumnType("int");
 
                     b.HasKey("id");
 
@@ -485,6 +485,7 @@ namespace Thesis.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("authorId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("comment")
@@ -495,16 +496,13 @@ namespace Thesis.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("wordNumber")
-                        .HasColumnType("int");
-
                     b.HasKey("id");
 
                     b.HasIndex("AnswerId");
 
                     b.HasIndex("authorId");
 
-                    b.ToTable("reviewComments");
+                    b.ToTable("ReviewComment");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -665,7 +663,9 @@ namespace Thesis.Migrations
 
                     b.HasOne("Thesis.Models.ApplicationUser", "author")
                         .WithMany()
-                        .HasForeignKey("authorId");
+                        .HasForeignKey("authorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("answer");
 

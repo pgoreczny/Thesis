@@ -9,7 +9,7 @@
         </style>
     </head>
    <body>
-      <form id="editForm" data-user="@Model.id" method="post" action="/Course/Activity/Save">
+      <form id="editForm" data-user="@Model.id">
         <div id="submitForm" class="btn btn-primary">Save</div>
         <input name="id" style="visibility: hidden" id = "id" value = "@Model.id" />
         <input name="courseId" style="visibility: hidden" id = "courseId" value = "@Model.courseId" />
@@ -55,6 +55,7 @@
                     <tr>
                         <th>Student</th>
                         <th>Entry date</th>
+                        <th>Version</th>
                         <th>Check on-line</th>
                         <th>Download</th>
                         <th>Checked</th>
@@ -66,7 +67,16 @@
                     <tr>
                         <td>@answer.student.UserName</td>
                         <th>@await Component.InvokeAsync("DateLabel", answer.entryDate)</th>
-                        <td>//todo</td>
+                        <th>@answer.version</th>
+                        <td><button class="btn btn-outline-primary" onclick="location.href='/Course/grading/grade?answerId=@answer.id'">@if (answer.isChecked)
+                            {
+                                <span>Re-check</span>
+                            }
+                            else
+                            {
+                                <span>Check</span>
+                            }
+                        </button></td>
                         <td data-id="@answer.fileId" class="download"><i class="bi bi-download"></i></td>
                         <td>
                             @if (answer.isChecked)
@@ -94,11 +104,14 @@
                  for ( var key in form ) {
                      formData.append(key, form[key]);
                  }
-                 console.log(form);
                  fetch("/Course/Activity/Save", {
                       method: 'POST',
                       body: formData,
-                 }).then(function () {
+                 })
+                 .then(function (a) {
+                    return a.json();
+                  })
+                 .then(function (data) {
                     Toastify({
                         text: "Activity saved successfully",
                         duration: 3000,
@@ -108,7 +121,7 @@
                     }).showToast();
                     if (data.success) {
                         setTimeout(function () {
-                            location.reload();
+                            location.href = data.data[0];
                         }, 1000);
                     }
                 });

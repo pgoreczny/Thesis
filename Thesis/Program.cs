@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CoursesDBContextConnection") ?? throw new InvalidOperationException("Connection string 'CoursesDBContextConnection' not found.");
 
 builder.Services.AddDbContext<CoursesDBContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+    );
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()

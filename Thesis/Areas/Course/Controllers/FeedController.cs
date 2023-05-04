@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Models;
 using Thesis.Services;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Thesis.Areas.Course.Controllers
 {
@@ -119,20 +120,20 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public IActionResult AddAnswer(IFormFile file, [FromQuery] int activity)
         {
-            Answer answer = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            List<Answer> answers = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            Answer answer = answers.Count > 0 ? answers.Last() : null;
             if (answer == null)
             {
-                answer = new Answer { entryDate = DateTime.Now, editable = false, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity };
+                answer = new Answer { entryDate = DateTime.Now, editable = false, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = 1 };
                 answer = answerService.addAnswer(answer);
             }
             else
             {
-                answer.entryDate = DateTime.Now;
-                answer.isChecked = false;
-                answer.editable = false;
-                answerService.updateAnswer(answer);
+                answer = new Answer { entryDate = DateTime.Now, editable = false, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = answer.version + 1 };
+                answer = answerService.addAnswer(answer);
             }
             Models.File fileModel = fileService.saveFile(file, enConnectionType.answer, answer.id);
+            answerService.saveComment(new ReviewComment { answer = answer, AnswerId = answer.id, comment = "", position = "", wordNumber = 0, author = userService.getCurrentUser().Result });
             if (fileModel != null)
             {
                 answerService.addFile(fileModel, answer.id);
@@ -143,21 +144,20 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public OperationResult SaveAnswer([FromBody] string content, [FromQuery] int activity)
         {
-            Answer answer = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            List<Answer> answers = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
+            Answer answer = answers.Count > 0 ? answers.Last() : null;
             string fileName = activityService.getActivityById(activity).title + "-" + userService.getCurrentUser().Result.UserName + ".html";
             if (answer == null)
             {
-                answer = new Answer { entryDate = DateTime.Now, editable = true, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity };
+                answer = new Answer { entryDate = DateTime.Now, editable = true, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = 1 };
                 answer = answerService.addAnswer(answer);
             }
             else
             {
-                answer.entryDate = DateTime.Now;
-                answer.isChecked = false;
-                answer.editable = false;
-                answerService.updateAnswer(answer);
+                answer = new Answer { entryDate = DateTime.Now, editable = true, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = answer.version + 1 };
+                answer = answerService.addAnswer(answer);
             }
-            Models.File fileModel = fileService.makeFile(content, fileName, enConnectionType.answer, answer.id);
+            Models.File fileModel = fileService.makeFile(answerService.parseAnswerText(content), fileName, enConnectionType.answer, answer.id);
             if (fileModel != null)
             {
                 answerService.addFile(fileModel, answer.id);
@@ -168,7 +168,34 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public IActionResult WriteAnswer([FromQuery] int activity)
         {
-            return View("AnswerEditor", (activity, activityService.getActivityById(activity).courseId));
+            Activity current = activityService.GetActivityByIdWithParent(activity);
+            crumbs.Add(new Breadcrumb { text = current.course.name, url = "/course/feed/feed?id=" + current.courseId });
+            crumbs.Add(new Breadcrumb { text = current.title, current = true });
+            ViewBag.crumbs = crumbs;
+            return View("AnswerEditor", (activity, current.courseId));
+        }
+
+        [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
+        public IActionResult comments([FromQuery] int id)
+        {
+            Answer answer = answerService.findAnswerWithParents(id);
+            if (answer == null)
+            {
+                return LocalRedirect("/Home/showError");
+            }
+            crumbs.Add(new Breadcrumb { text = answer.activity.course.name, url = "/course/feed/feed?id=" + answer.activity.course.id });
+            crumbs.Add(new Breadcrumb { text = string.Format("{0} - Answer({1})", answer.activity.title, answer.version), current = true });
+            ViewBag.crumbs = crumbs;
+            Models.File answerFile = fileService.getFileModel((Guid)answer.fileId);
+            if (answer.editable)
+            {
+                byte[] file = fileService.getFile(answerFile);
+                return View("commentedAnswer", (answer, System.Text.Encoding.Default.GetString(file), answer.comments));
+            }
+            else
+            {
+                return View("simpleCommentedAnswer", (answer, answerFile, answer.comments[0]));
+            }
         }
     }
 }

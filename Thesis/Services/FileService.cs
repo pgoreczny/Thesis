@@ -77,10 +77,12 @@ namespace Thesis.Services
             }
             return fileModel;
         }
+
         public byte[] getFile(Models.File file)
         {
             return System.IO.File.ReadAllBytes(file.path);
         }
+
         public string getFileType(Models.File file)
         {
             FileExtensionContentTypeProvider fileProvider = new FileExtensionContentTypeProvider();

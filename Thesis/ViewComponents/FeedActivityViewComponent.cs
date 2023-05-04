@@ -16,8 +16,8 @@ namespace Thesis.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync(Activity model)
         {
-            Answer answer = answerService.findAnswer(model.id, userService.getCurrentUser().Result.Id);
-            return await Task.FromResult((IViewComponentResult)View("FeedActivity", (model, answer)));
+            List<Answer> answers = answerService.findAnswer(model.id, userService.getCurrentUser().Result.Id);
+            return await Task.FromResult((IViewComponentResult)View("FeedActivity", (model, answers)));
         }
     }
 }

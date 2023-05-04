@@ -1,0 +1,9 @@
+﻿@using Thesis.Models
+@model (Answer answer, File answerFile, ReviewComment comment)
+<h3>Comments</h3>
+<br />
+<button data-id="@Model.answer.fileId" class="download btn btn-primary">Download answer<i class="bi bi-download"></i></button>
+<br />
+<div>
+    @Model.comment.comment
+</div>

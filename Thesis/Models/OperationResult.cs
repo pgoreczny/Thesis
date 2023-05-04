@@ -6,6 +6,7 @@ namespace Thesis.Models
     {
         public bool success { get; set; }
         public string text { get; set; }
+        public List<string> data { get; set; }
 
         public OperationResult()
         {

@@ -15,6 +15,20 @@ namespace Thesis.Services
             this.context.ChangeTracker.AutoDetectChangesEnabled = false;
             this.fileService = fileService;
         }
+
+        public Activity GetActivityByIdWithParent(int id)
+        {
+            List<Activity> activities = context.activities
+                .Include(activity => activity.course)
+                .Where(activity => activity.id == id)
+                .ToList();
+            if (activities.Count == 0)
+            {
+                return new Activity();
+            }
+            return activities[0];
+        }
+
         public Activity getActivityById(int id)
         {
             List<Activity> activities = context.activities

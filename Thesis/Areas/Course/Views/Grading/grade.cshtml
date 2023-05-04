@@ -1,0 +1,273 @@
+﻿@using Thesis.Models
+@model (Answer answer, string text, List<ReviewComment> comments)
+
+<style>
+    .comment {
+        border: 1px solid;
+    }
+
+    .commented {
+        background-color: yellow;
+        opacity: 0.5;
+    }
+    .hidden {
+        visibility: hidden;
+        display: none;
+    }
+
+    .deleteComment {
+        cursor: pointer;
+    }
+    .editComment {
+        cursor: pointer;
+    }
+    .bi {
+        font-size: 1.4em;
+    }
+</style>
+
+<div data-id="0" data-answer="@Model.answer.id" data-target="" class="modal fade" data-backdrop="false" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close hideModal">&times;</button>
+                <h4 class="modal-title">Review</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <textarea id="newComment" class="form-control" type="text"></textarea>
+                </div>
+
+                <button id="saveComment" class="btn btn-primary">Save</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default hideModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<h2>Click anywhere in the text to add comments</h2>
+<br />
+<button onclick="location.href='/course/grading/submitReview?answerId=@Model.answer.id'" id="end" class="btn btn-success">End review</button>
+<button onclick="location.href='/course/activity/edit?id=@Model.answer.activityId'" id="pause" class="btn btn-warning">Pause review</button>
+<button data-visible="true" id="comments_visibility" class="btn btn-info">Hide comments</button>
+<br />
+<br />
+<div class="container text-center">
+    <div class="row">
+        <div class="col-9">
+            @Html.Raw(Model.text)
+        </div>
+        <div id="comment-area" class="col-3">
+            @foreach (ReviewComment comment in Model.comments)
+            {
+                <div data-id="@comment.id" id="comment_@comment.id" data-target="@comment.position" class="comment">
+                    <a class="btn" data-bs-toggle="collapse" href="#collapse_@comment.id" role="button" aria-expanded="false" aria-controls="collapse_@comment.id">
+                        <div class="row">
+                            <div id="comment_author_@comment.id" class="col-9">
+                                Commented by @comment.author.UserName
+                             </div>
+                            <div class="col-1">
+                                <i data-id="@comment.id" data-target="@comment.position" class="bi bi-pencil editComment"></i>
+                            </div>
+                            <div class="col-1">
+                                <i data-id="@comment.id" data-target="@comment.position" class="bi bi-trash deleteComment"></i>
+                            </div>
+                            <div class="col-1"></div>
+                        </div>
+                    </a>
+                    <div class="collapse" id="collapse_@comment.id">
+                        @comment.comment
+                    </div>
+                </div>
+                <br />
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    window.onload = function () {
+        connectAll();
+        $('.word').click(function () {
+            $("#myModal").data('target', $(this).attr('id'));
+            $('#myModal').data('id', 0);
+            $("#myModal").modal("show");
+        })
+        $('#saveComment').click(function () {
+            $("#myModal").modal("hide");
+            const comment = {
+                comment: $('#newComment').val(),
+                position: $('#myModal').data('target'),
+                AnswerId: $('#myModal').data('answer'),
+                id: $('#myModal').data('id')
+            }
+            fetch('/Course/Grading/Comment', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(comment)
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    $('#newComment').val('');
+                    console.log($('#myModal').data('id'));
+                    if (data.success)
+                    {
+                        if ($('#myModal').data('id') === 0) {
+                            $('#comment-area').append(`
+                                <div data-id="${data.data[0]}" id="comment_${ data.data[0] }" data-target="${ comment.position }" class="comment">
+                                 <a class="btn" data-bs-toggle="collapse" href="#collapse_${data.data[0]}" role="button" aria-expanded="false" aria-controls="collapse_${data.data[0]}">
+                                    <div class="row">
+                                           <div id="comment_author_${data.data[0]}" class="col-9">
+                                                Commented by ${data.data[1]}
+                                         </div>
+                                        <div class="col-1">
+                                                    <i data-id="${data.data[0]}" data-target="${comment.position}" class="bi bi-pencil editComment"></i>
+                                        </div>
+                                        <div class="col-1">
+                                                    <i data-id="${data.data[0]}" data-target="${comment.position}" class="bi bi-trash deleteComment"></i>
+                                        </div>
+                                        <div class="col-1"></div>
+                                    </div>
+                                </a>
+                                    <div class="collapse" id="collapse_${data.data[0]}">
+                                    ${comment.comment}
+                                </div>
+                            </div>
+                            <br />`)
+                            const elem1 = document.getElementById(`comment_${data.data[0]}`);
+                            const elem2 = document.getElementById(comment.position);
+                            elem2.classList.add('commented');
+                            connect(elem1, elem2, 'black', 1, data.data[0]);
+                            toggleComments(false);
+                        }
+                        else {
+                            $(`#collapse_${data.data[0]}`).text(comment.comment);
+                            $(`#comment_author_${data.data[0]}`).text(`Commented by ${data.data[1]}`);
+                        }
+                    }
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        });
+        $(document).on('click', '.hideModal', function () {
+            $('#newComment').val('');
+            $("#myModal").modal("hide");
+        })
+        $('#comments_visibility').click(function () {
+            toggleComments($(this).data('visible'));
+        })
+        $(document).on('click', '.deleteComment', function (e) {
+            e.stopPropagation();
+            const id = $(this).data('id');
+            const target = $(this).data('target');
+            fetch('/Course/Grading/deleteComment?comment=' + id, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    if (data.success) {
+                        $('#connector_' + id).remove();
+                        $('#comment_' + id).remove();
+                        $('#' + target).removeClass('commented');
+                        $('.connector').remove();
+                        connectAll();
+                    }
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        });
+        $(document).on('click', '.editComment', function () {
+            $("#myModal").data('target', $(this).data('target'));
+            $('#myModal').data('id', $(this).data('id'));
+            $('#newComment').val($('#collapse_' + $(this).data('id')).text().trim());
+            $("#myModal").modal("show");
+        })
+    }
+
+    function toggleComments(visible)
+    {
+        if (visible) {
+            $('#comments_visibility').text('Show comments');
+            $('#comments_visibility').data('visible', false);
+            $('.connector').addClass('hidden');
+            $('.comment').addClass('hidden');
+        }
+        else {
+            $('#comments_visibility').text('Hide comments');
+            $('#comments_visibility').data('visible', true);
+            $('.connector').removeClass('hidden');
+            $('.comment').removeClass('hidden');
+        }
+    }
+    function getOffset(el) {
+        var rect = el.getBoundingClientRect();
+        return {
+            left: rect.left + window.pageXOffset,
+            top: rect.top + window.pageYOffset,
+            width: rect.width || el.offsetWidth,
+            height: rect.height || el.offsetHeight
+        };
+    }
+
+    function connect(elem1, elem2, color, width, target) {
+        var offset1 = getOffset(elem1);
+        var offset2 = getOffset(elem2);
+        var x1 = offset1.left;
+        var y1 = offset1.top + offset1.height / 2;
+        var x2 = offset2.left + offset2.width;
+        var y2 = offset2.top + offset2.height / 2;
+        var length = Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+        var cx = ((x1 + x2) / 2) - (length / 2);
+        var cy = ((y1 + y2) / 2) - (width / 2);
+        var angle = Math.atan2((y1 - y2), (x1 - x2)) * (180 / Math.PI);
+        var connector = "<div id='connector_" + target + "' class='connector' style='padding:0px; margin:0px; height:" + width + "px; background-color:" + color + "; opacity: 0.5; line-height:1px; position:absolute; left:" + cx + "px; top:" + cy + "px; width:" + length + "px; -moz-transform:rotate(" + angle + "deg); -webkit-transform:rotate(" + angle + "deg); -o-transform:rotate(" + angle + "deg); -ms-transform:rotate(" + angle + "deg); transform:rotate(" + angle + "deg);' />";
+        //document.body.innerHTML += htmlLine;
+        $(document.body).append(connector);
+    }
+
+    function connectAll() {
+        $('.comment').each(function () {
+            const elem1 = document.getElementById($(this).attr('id'));
+            const elem2 = document.getElementById($(this).data('target'));
+            elem2.classList.add('commented');
+            connect(elem1, elem2, 'black', 1, $(this).data('id'));
+        })
+    }
+</script>
