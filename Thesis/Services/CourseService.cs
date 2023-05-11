@@ -57,7 +57,7 @@ namespace Thesis.Services
                 .Include(course => course.activities)
                 .Include(course => course.CourseApplicationUsers)
                     .ThenInclude(join => join.applicationUser)
-                .Where(course => course.id == id).ToList();
+                .Where(course => course.id == id && course.id != 0).ToList();
             if (courses.Count == 0)
             {
                 return new Course();
@@ -72,7 +72,7 @@ namespace Thesis.Services
                     .ThenInclude(activity => activity.answers)
                 .Include(course => course.CourseApplicationUsers)
                     .ThenInclude(join => join.applicationUser)
-                .Where(course => course.id == id).ToList();
+                .Where(course => course.id == id && course.id != 0).ToList();
             if (courses.Count == 0)
             {
                 return new Course();
@@ -87,7 +87,7 @@ namespace Thesis.Services
         public List<Course> getAvailable()
         {
             return context.courses
-                .Where(course => course.startDate.CompareTo(DateTime.Now) < 0 && course.endDate.CompareTo(DateTime.Now) > 0)
+                .Where(course => course.id != 0 && course.startDate.CompareTo(DateTime.Now) < 0 && course.endDate.CompareTo(DateTime.Now) > 0)
                 .ToList();
         }
 
@@ -98,6 +98,7 @@ namespace Thesis.Services
             if (withChildren)
             {
                 return context.courses
+                    .Where(course => course.id != 0)
                     .Include(course => course.createdBy)
                     .Include(course => course.updatedBy)
                     .Include(course => course.activities)
@@ -107,6 +108,7 @@ namespace Thesis.Services
             else
             {
                 return context.courses
+                    .Where(course => course.id != 0)
                     .Include(course => course.createdBy)
                     .Include(course => course.updatedBy)
                     .ToList();
@@ -121,7 +123,7 @@ namespace Thesis.Services
 
         public void deleteCourses(List<int> ids)
         {
-            List<Course> courses = context.courses.Where(course => ids.Contains(course.id)).ToList();
+            List<Course> courses = context.courses.Where(course => ids.Contains(course.id) && course.id != 0).ToList();
             context.courses.RemoveRange(courses);
             context.SaveChanges();
         }

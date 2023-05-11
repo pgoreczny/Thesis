@@ -27,7 +27,7 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.ManageCourses.CourseList)]
         public IActionResult CourseList()
         {
-            List<Models.Course> courses = courseService.getCourses().ToList();
+            List<Thesis.Models.Course> courses = courseService.getCourses().ToList();
             crumbs[1] = new Breadcrumb { text = "Courses", current = true };
             ViewBag.crumbs = crumbs;
             return View("courseList", courses);
@@ -37,20 +37,20 @@ namespace Thesis.Areas.Course.Controllers
         {
             crumbs.Add(new Breadcrumb { text = "Add course", current = true });
             ViewBag.crumbs = crumbs;
-            return View("CourseAdd", new Models.Course());
+            return View("CourseAdd", new Thesis.Models.Course());
         }
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
         public IActionResult edit([FromQuery(Name = "id")] int id)
         {
             crumbs.Add(new Breadcrumb { text = "Edit course", current = true });
             ViewBag.crumbs = crumbs;
-            Models.Course course = courseService.getCourseById(id);
+            Thesis.Models.Course course = courseService.getCourseById(id);
             List<Activity> activities = activityService.getActivities();
             return View("CourseEdit", (course, activities));
         }
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
         [HttpPost]
-        public IActionResult save([FromForm] Models.Course course)
+        public IActionResult save([FromForm] Thesis.Models.Course course)
         {
             if (course.createdBy == null)
             {

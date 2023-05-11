@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Thesis.Models;
 using File = Thesis.Models.File;
+using Thesis.Areas.Forum.Models;
 
 namespace Thesis.database
 {
@@ -25,6 +26,8 @@ namespace Thesis.database
         public DbSet<Answer> answers { get; set; }
         public DbSet<Currency> currencies { get; set; }
         public DbSet<ReviewComment> reviewComments { get; set; }
+        public DbSet<Post> posts { get; set; }
+        public DbSet<PostComment> postComments { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -59,6 +62,10 @@ namespace Thesis.database
                 .WithMany(s => s.CourseApplicationUsers)
                 .HasForeignKey(c => c.ApplicationUserId);
 
+            modelBuilder.Entity<PostComment>()
+                .HasOne(comment => comment.post)
+                .WithMany(post => post.comments)
+                .HasForeignKey(comment => comment.postId);
 
             modelBuilder.Entity<Answer>()
                 .HasMany(answer => answer.comments)

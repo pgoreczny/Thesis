@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis.database;
 
@@ -11,9 +12,11 @@ using Thesis.database;
 namespace Thesis.Migrations
 {
     [DbContext(typeof(CoursesDBContext))]
-    partial class CoursesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230505150052_postComments3")]
+    partial class postComments3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -187,9 +190,6 @@ namespace Thesis.Migrations
                     b.Property<bool>("edited")
                         .HasColumnType("bit");
 
-                    b.Property<string>("editorId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -199,8 +199,6 @@ namespace Thesis.Migrations
                     b.HasIndex("activityId");
 
                     b.HasIndex("authorId");
-
-                    b.HasIndex("editorId");
 
                     b.ToTable("posts");
                 });
@@ -230,17 +228,12 @@ namespace Thesis.Migrations
                     b.Property<bool>("edited")
                         .HasColumnType("bit");
 
-                    b.Property<string>("editorId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int?>("postId")
                         .HasColumnType("int");
 
                     b.HasKey("id");
 
                     b.HasIndex("authorId");
-
-                    b.HasIndex("editorId");
 
                     b.HasIndex("postId");
 
@@ -658,15 +651,9 @@ namespace Thesis.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thesis.Models.ApplicationUser", "editor")
-                        .WithMany()
-                        .HasForeignKey("editorId");
-
                     b.Navigation("activity");
 
                     b.Navigation("author");
-
-                    b.Navigation("editor");
                 });
 
             modelBuilder.Entity("Thesis.Areas.Forum.Models.PostComment", b =>
@@ -677,17 +664,11 @@ namespace Thesis.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thesis.Models.ApplicationUser", "editor")
-                        .WithMany()
-                        .HasForeignKey("editorId");
-
                     b.HasOne("Thesis.Areas.Forum.Models.Post", "post")
                         .WithMany("comments")
                         .HasForeignKey("postId");
 
                     b.Navigation("author");
-
-                    b.Navigation("editor");
 
                     b.Navigation("post");
                 });

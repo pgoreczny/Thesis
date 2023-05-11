@@ -24,7 +24,7 @@ namespace Thesis.Services
                 .ToList();
             if (activities.Count == 0)
             {
-                return new Activity();
+                return null;
             }
             return activities[0];
         }
@@ -47,6 +47,7 @@ namespace Thesis.Services
         public List<Activity> getActivities()
         {
             return context.activities
+                .Where(activity => activity.id != 0)
                 .ToList();
         }
 
@@ -60,14 +61,14 @@ namespace Thesis.Services
 
         public void deleteActivity(int id)
         {
-            List<Activity> activities = context.activities.Where(activity => activity.id == id).ToList();
+            List<Activity> activities = context.activities.Where(activity => activity.id == id && activity.id != 0).ToList();
             context.activities.RemoveRange(activities);
             context.SaveChanges();
         }
 
         public void deleteActivities(List<int> ids)
         {
-            List<Activity> activities = context.activities.Where(activity => ids.Contains(activity.id)).ToList();
+            List<Activity> activities = context.activities.Where(activity => ids.Contains(activity.id) && activity.id != 0).ToList();
             context.activities.RemoveRange(activities);
             context.SaveChanges();
         }

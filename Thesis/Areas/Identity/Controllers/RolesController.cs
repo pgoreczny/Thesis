@@ -25,7 +25,7 @@ namespace Thesis.Areas.Identity.Controllers
         }
 
         [Authorize(Roles = Roles.Admin)]
-        public async System.Threading.Tasks.Task setUp()
+        public async Task setUp()
         {
             IdentityRole admin = new IdentityRole(Roles.Admin);
             IdentityRole lecturer = new IdentityRole(Roles.Lecturer);
@@ -71,6 +71,24 @@ namespace Thesis.Areas.Identity.Controllers
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
             await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
+
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.WritePost));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditYour));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditAny));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.Delete));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.WritePost));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditYour));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditAny));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.WritePost));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
+            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditYour));
+            await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
+            await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
         }
 
         //[Authorize(Policy = Claims.Roles.AssignRole)]

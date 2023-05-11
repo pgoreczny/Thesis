@@ -34,7 +34,7 @@ namespace Thesis.Areas.Course.Controllers
             crumbs.Add(new Breadcrumb { text = answer.activity.title, url = "/Course/Activity/edit?id=" + answer.activity.id });
             crumbs.Add(new Breadcrumb { text = answer.student.UserName, current = true });
             ViewBag.crumbs = crumbs;
-            Models.File answerFile = fileService.getFileModel((Guid)answer.fileId);
+            Thesis.Models.File answerFile = fileService.getFileModel((Guid)answer.fileId);
             if (answer.editable)
             {
                 byte[] file = fileService.getFile(answerFile);

@@ -81,7 +81,7 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
         public IActionResult saveFile(IFormFile file, [FromQuery] int id)
         {
-            Models.File fileModel = fileService.saveFile(file, enConnectionType.activity, id);
+            Thesis.Models.File fileModel = fileService.saveFile(file, enConnectionType.activity, id);
             if (fileModel != null)
             {
                 activityService.addFile(fileModel, id);
@@ -92,7 +92,7 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public FileResult getFile(Guid id)
         {
-            Models.File file = fileService.getFileModel(id);
+            Thesis.Models.File file = fileService.getFileModel(id);
             FileContentResult result = new FileContentResult(fileService.getFile(file), fileService.getFileType(file))
             {
                 FileDownloadName = file.showName

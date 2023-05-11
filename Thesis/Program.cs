@@ -61,6 +61,21 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Claims.UserCourses.ParticipateInCourse,
         policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
     #endregion
+
+    #region Forum 
+    options.AddPolicy(Claims.Forum.WritePost,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.WritePost)); 
+    options.AddPolicy(Claims.Forum.CommentPost,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.CommentPost)); 
+    options.AddPolicy(Claims.Forum.EditYour,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.EditYour)); 
+    options.AddPolicy(Claims.Forum.EditAny,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.EditAny)); 
+    options.AddPolicy(Claims.Forum.Delete,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.Delete));
+    options.AddPolicy(Claims.Forum.ReadPost,
+        policy => policy.RequireClaim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
+    #endregion
 });
 
 // Add services to the container.
@@ -73,6 +88,7 @@ builder.Services.AddScoped<ActivityService, ActivityService>();
 builder.Services.AddScoped<FileService, FileService>();
 builder.Services.AddScoped<PaymentService, PaymentService>();
 builder.Services.AddScoped<AnswerService, AnswerService>();
+builder.Services.AddScoped<ForumService, ForumService>();
 
 builder.Services.Configure<RequestLocalizationOptions>(opt =>
 {

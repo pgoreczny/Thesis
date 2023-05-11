@@ -1,0 +1,14 @@
+﻿@model List<string>
+
+<h3>Forum</h3>
+
+@foreach (string category in Model)
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@category</h5>
+            <p class="card-text"></p>
+            <a href="" style="float: right" class="btn btn-primary">See posts</a>
+        </div>
+    </div>
+}

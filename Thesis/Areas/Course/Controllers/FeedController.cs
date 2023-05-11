@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Models;
 using Thesis.Services;
-using static System.Net.Mime.MediaTypeNames;
+using static Thesis.Areas.Identity.Constants.Claims;
 
 namespace Thesis.Areas.Course.Controllers
 {
@@ -39,9 +40,9 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.AccessCourse)]
         public IActionResult course(int id)
         {
-            if (courseService.checkCourseAccess(userService.getCurrentUser().Result, id))
+            if (checkAllowed(id))
             {
-                Models.Course course = courseService.getCourseById(id);
+                Thesis.Models.Course course = courseService.getCourseById(id);
                 crumbs.Add(new Breadcrumb { text = course.name, current = true });
                 ViewBag.crumbs = crumbs;
                 return View("courses", course);
@@ -56,23 +57,22 @@ namespace Thesis.Areas.Course.Controllers
         {
             crumbs.Add(new Breadcrumb { text = "Join the course", current = true });
             ViewBag.crumbs = crumbs;
-            ApplicationUser user = userService.getCurrentUser().Result;
-            if (!courseService.checkIfExists(id) || courseService.checkCourseAccess(user, id))
+            if (!checkAllowed(id))
             {
                 return LocalRedirect("/Home/showError");
             }
-            Models.Course course = courseService.getCourseById(id);
+            Thesis.Models.Course course = courseService.getCourseById(id);
             return View("joinCourse", course);
         }
         [Authorize(Policy = Claims.UserCourses.JoinCourse)]
         public IActionResult join([FromQuery] int id)
         {
             ApplicationUser user = userService.getCurrentUser().Result;
-            if (!courseService.checkIfExists(id) || courseService.checkCourseAccess(user, id))
+            if (!checkAllowed(id))
             {
                 return LocalRedirect("/Home/showError");
             }
-            Models.Course course = courseService.getCourseById(id);
+            Thesis.Models.Course course = courseService.getCourseById(id);
             CourseApplicationUser courseUser = new CourseApplicationUser { course = course, CourseId = course.id, applicationUser = user, ApplicationUserId = user.Id, status = enCourseUserStatus.waitingForApproval };
             courseService.addUser(courseUser);
             return LocalRedirect("/Course/Feed/availableCourses");
@@ -82,12 +82,11 @@ namespace Thesis.Areas.Course.Controllers
         {
             crumbs.Add(new Breadcrumb { text = "Leave course", current = true });
             ViewBag.crumbs = crumbs;
-            ApplicationUser user = userService.getCurrentUser().Result;
-            if (!courseService.checkIfExists(id) || !courseService.checkCourseAccess(user, id))
+            if (!checkAllowed(id))
             {
                 return LocalRedirect("/Home/showError");
             }
-            Models.Course course = courseService.getCourseById(id);
+            Thesis.Models.Course course = courseService.getCourseById(id);
             return View("confirmLeave", course);
         }
 
@@ -95,7 +94,7 @@ namespace Thesis.Areas.Course.Controllers
         public IActionResult leave([FromQuery] int id)
         {
             ApplicationUser user = userService.getCurrentUser().Result;
-            if (!courseService.checkIfExists(id) || !courseService.checkCourseAccess(user, id))
+            if (!checkAllowed(id))
             {
                 return LocalRedirect("/Home/showError");
             }
@@ -106,12 +105,11 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public IActionResult feed([FromQuery] int id)
         {
-            ApplicationUser user = userService.getCurrentUser().Result;
-            if (!courseService.checkIfExists(id) || !courseService.checkCourseAccess(user, id))
+            if (!checkAllowed(id))
             {
                 return LocalRedirect("/Home/showError");
             }
-            Models.Course course = courseService.getCourseByIdWithDependencies(id);
+            Thesis.Models.Course course = courseService.getCourseByIdWithDependencies(id);
             crumbs.Add(new Breadcrumb { text = course.name, current = true });
             ViewBag.crumbs = crumbs;
             return View("feed", course);
@@ -120,6 +118,10 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public IActionResult AddAnswer(IFormFile file, [FromQuery] int activity)
         {
+            if (!checkAllowedByActivity(activity))
+            {
+                return LocalRedirect("/Home/showError");
+            }
             List<Answer> answers = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
             Answer answer = answers.Count > 0 ? answers.Last() : null;
             if (answer == null)
@@ -132,7 +134,7 @@ namespace Thesis.Areas.Course.Controllers
                 answer = new Answer { entryDate = DateTime.Now, editable = false, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = answer.version + 1 };
                 answer = answerService.addAnswer(answer);
             }
-            Models.File fileModel = fileService.saveFile(file, enConnectionType.answer, answer.id);
+            Thesis.Models.File fileModel = fileService.saveFile(file, enConnectionType.answer, answer.id);
             answerService.saveComment(new ReviewComment { answer = answer, AnswerId = answer.id, comment = "", position = "", wordNumber = 0, author = userService.getCurrentUser().Result });
             if (fileModel != null)
             {
@@ -144,6 +146,10 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public OperationResult SaveAnswer([FromBody] string content, [FromQuery] int activity)
         {
+            if (!checkAllowedByActivity(activity))
+            {
+                return new OperationResult { success = false, text = "You don't have access to this actvity" };
+            }
             List<Answer> answers = answerService.findAnswer(activity, userService.getCurrentUser().Result.Id);
             Answer answer = answers.Count > 0 ? answers.Last() : null;
             string fileName = activityService.getActivityById(activity).title + "-" + userService.getCurrentUser().Result.UserName + ".html";
@@ -157,7 +163,7 @@ namespace Thesis.Areas.Course.Controllers
                 answer = new Answer { entryDate = DateTime.Now, editable = true, isChecked = false, student = userService.getCurrentUser().Result, activityId = activity, version = answer.version + 1 };
                 answer = answerService.addAnswer(answer);
             }
-            Models.File fileModel = fileService.makeFile(answerService.parseAnswerText(content), fileName, enConnectionType.answer, answer.id);
+            Thesis.Models.File fileModel = fileService.makeFile(answerService.parseAnswerText(content), fileName, enConnectionType.answer, answer.id);
             if (fileModel != null)
             {
                 answerService.addFile(fileModel, answer.id);
@@ -168,7 +174,12 @@ namespace Thesis.Areas.Course.Controllers
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
         public IActionResult WriteAnswer([FromQuery] int activity)
         {
-            Activity current = activityService.GetActivityByIdWithParent(activity);
+            if (!checkAllowedByActivity(activity))
+            {
+                return LocalRedirect("/Home/showError");
+            }
+            Models.Activity current = activityService.GetActivityByIdWithParent(activity);
+
             crumbs.Add(new Breadcrumb { text = current.course.name, url = "/course/feed/feed?id=" + current.courseId });
             crumbs.Add(new Breadcrumb { text = current.title, current = true });
             ViewBag.crumbs = crumbs;
@@ -183,10 +194,14 @@ namespace Thesis.Areas.Course.Controllers
             {
                 return LocalRedirect("/Home/showError");
             }
+            if (!checkAllowedByActivity(answer.activityId))
+            {
+                return LocalRedirect("/Home/showError");
+            }
             crumbs.Add(new Breadcrumb { text = answer.activity.course.name, url = "/course/feed/feed?id=" + answer.activity.course.id });
             crumbs.Add(new Breadcrumb { text = string.Format("{0} - Answer({1})", answer.activity.title, answer.version), current = true });
             ViewBag.crumbs = crumbs;
-            Models.File answerFile = fileService.getFileModel((Guid)answer.fileId);
+            Thesis.Models.File answerFile = fileService.getFileModel((Guid)answer.fileId);
             if (answer.editable)
             {
                 byte[] file = fileService.getFile(answerFile);
@@ -196,6 +211,22 @@ namespace Thesis.Areas.Course.Controllers
             {
                 return View("simpleCommentedAnswer", (answer, answerFile, answer.comments[0]));
             }
+        }
+
+        private bool checkAllowed(int id)
+        {
+            ApplicationUser user = userService.getCurrentUser().Result;
+            return courseService.checkIfExists(id) || courseService.checkCourseAccess(user, id);
+        }
+        private bool checkAllowedByActivity(int id)
+        {
+            ApplicationUser user = userService.getCurrentUser().Result;
+            Models.Activity activity = activityService.GetActivityByIdWithParent(id);
+            if (activity == null)
+            {
+                return false;
+            }
+            return courseService.checkIfExists(activity.courseId) || courseService.checkCourseAccess(user, id);
         }
     }
 }

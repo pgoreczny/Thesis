@@ -35,5 +35,15 @@
         {
             public const string AssignRole = "Assign role to user";
         }
+
+        public class Forum
+        {
+            public const string ReadPost = "Read a post";
+            public const string WritePost = "Write a post";
+            public const string EditYour = "Edit your post or comment";
+            public const string CommentPost = "Comment post";
+            public const string EditAny = "Edit any post or comment";
+            public const string Delete = "Delete posts and comments";
+        }
     }
 }
