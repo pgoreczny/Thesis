@@ -12,7 +12,7 @@
         <i class="bi bi-book" style="font-size: 2em;"></i>
     }
 
-    <h3>@Model.activity.title</h3>
+    <h3>@Model.activity.title</h3><a class="btn btn-primary" href="/forum/forum/add?activityId=@Model.activity.id">Discuss this topic on forum</a>
     <p>@Model.activity.text</p>
     @if (Model.activity.files != null && Model.activity.files.Count > 0)
     {

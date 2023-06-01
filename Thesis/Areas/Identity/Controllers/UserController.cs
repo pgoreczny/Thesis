@@ -82,14 +82,12 @@ namespace Thesis.Areas.Identity.Controllers
                 user.Email = userModel.email;
                 user.UserName = userModel.userName;
                 IdentityResult result = userManager.UpdateAsync(user).Result;
-                if (result.Succeeded)
-                {
-                    await signInManager.SignInAsync(user, false);
-                }
             }
             return LocalRedirect("/Identity/User/editUser?id=" + userModel.id);
         }
 
+
+        [Authorize(Policy = Claims.Basic.IsRegistered)]
         public async Task<IActionResult> saveProfile([FromForm] UserModel userModel)
         {
             ApplicationUser user = userService.getUserById(userModel.id).Result;
@@ -98,10 +96,6 @@ namespace Thesis.Areas.Identity.Controllers
                 user.Email = userModel.email;
                 user.UserName = userModel.userName;
                 IdentityResult result = userManager.UpdateAsync(user).Result;
-                if (result.Succeeded)
-                {
-                    await signInManager.SignInAsync(user, false);
-                }
             }
             return LocalRedirect("/Identity/User/myProfile");
         }

@@ -69,7 +69,7 @@
         @if (Model.post.edited)
         {
             string editInfo = Model.post.editorId == Model.post.authorId ? "Edited" : "Edited by " + Model.post.editor.UserName;
-            @await Component.InvokeAsync("DateWithText", (Model.post.editDate, "Edited"))
+            @await Component.InvokeAsync("DateWithText", (Model.post.editDate, editInfo))
         }
     </div>
 </div>
@@ -150,18 +150,18 @@
 
             var url = "/Forum/Forum/saveComment?id=@Model.post.id";
             if ($('#saveComment').data('id') !== 0)  {
-                @if (Model.user.canEdit)
+                @if (Model.user.canEditAny)
                 {
                     <text>
-                        url = "/Forum/Forum/updateComment?id=" + $('#saveComment').data('id');
+                        url = "/Forum/Forum/editComment?id=" + $('#saveComment').data('id');
                     </text>
                 }
                 else
                 {
-                    @if (Model.user.canEditAny)
+                    @if (Model.user.canEdit)
                     {
                         <text>
-                          url = "/Forum/Forum/editComment?id=" + $('#saveComment').data('id');
+                          url = "/Forum/Forum/updateComment?id=" + $('#saveComment').data('id');
                         </text>
                     }
                 }

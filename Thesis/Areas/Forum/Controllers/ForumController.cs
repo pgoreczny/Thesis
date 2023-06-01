@@ -53,7 +53,7 @@ namespace Thesis.Areas.Forum.Controllers
         }
 
         [Authorize(Policy = Claims.Forum.WritePost)]
-        public IActionResult add([FromQuery] int courseId = -1, [FromQuery] int activtiyId = -1)
+        public IActionResult add([FromQuery] int courseId = -1, [FromQuery] int activityId = -1)
         {
             Thesis.Models.Course course = new Thesis.Models.Course();
             if (courseId != -1)
@@ -63,29 +63,29 @@ namespace Thesis.Areas.Forum.Controllers
                     return LocalRedirect("/Home/showError");
                 }
                 course = courseService.getCourseById(courseId);
-                activtiyId = 0;
+                activityId = 0;
             }
-            if (activtiyId != -1)
+            if (activityId != -1)
             {
-                if (!checkAllowedByActivity(activtiyId))
+                if (!checkAllowedByActivity(activityId))
                 {
                     return LocalRedirect("/Home/showError");
                 } 
-                if (activtiyId != 0)
+                if (activityId != 0)
                 {
-                    Post post = forumService.getPostByActivity(activtiyId);
+                    Post post = forumService.getPostByActivity(activityId);
                     if (post != null)
                     {
                         return LocalRedirect("/Forum/Forum/post?id=" + post.id);
                     }
-                    course = activityService.GetActivityByIdWithParent(activtiyId).course;
+                    course = activityService.GetActivityByIdWithParent(activityId).course;
                     courseId = course.id;
                 }
             }
             crumbs.Add(new Breadcrumb { text = course.name, url = "/forum/forum/category?id=" + courseId });
             crumbs.Add(new Breadcrumb { text = "Add post", current = true });
             ViewBag.crumbs = crumbs;
-            return View("writePost", (courseId, activtiyId));
+            return View("writePost", (courseId, activityId));
         }
 
         [Authorize(Policy = Claims.Forum.WritePost)]
@@ -99,7 +99,7 @@ namespace Thesis.Areas.Forum.Controllers
                     return new OperationResult { success = false, text = "Activity couldn't be found or you don't have access to it" };
                 }
 
-                if (forumService.getPostByActivity((int)post.activityId) == null && post.activityId > 0)
+                if (forumService.getPostByActivity((int)post.activityId) != null && post.activityId > 0)
                 {
                     return new OperationResult { success = false, text = "There already exists a post about this activity. Try visiting it." };
                 }

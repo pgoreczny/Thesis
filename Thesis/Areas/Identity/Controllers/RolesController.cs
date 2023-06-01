@@ -85,8 +85,8 @@ namespace Thesis.Areas.Identity.Controllers
             await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditAny));
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.WritePost));
-            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
-            await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditYour));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
+            await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.Forum.EditYour));
             await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
             await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.Forum.CommentPost));
         }
@@ -117,7 +117,6 @@ namespace Thesis.Areas.Identity.Controllers
                 IdentityResult result = role.isOn ? await userManager.AddToRoleAsync(user, role.name) : await userManager.RemoveFromRoleAsync(user, role.name);
                 if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, false);
                     return new OperationResult { success = true, text = "Role set successfully" };
                 }
                 return new OperationResult { success = false, text = result.Errors.First().Description };
