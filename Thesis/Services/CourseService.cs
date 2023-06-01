@@ -65,6 +65,20 @@ namespace Thesis.Services
             return courses[0];
         }
 
+        public Course getCourseWithDefault(int id)
+        {
+            List<Course> courses = context.courses
+                .Include(course => course.activities)
+                .Include(course => course.CourseApplicationUsers)
+                    .ThenInclude(join => join.applicationUser)
+                .Where(course => course.id == id).ToList();
+            if (courses.Count == 0)
+            {
+                return null;
+            }
+            return courses[0];
+        }
+
         public Course getCourseByIdWithDependencies(int id)
         {
             List<Course> courses = context.courses

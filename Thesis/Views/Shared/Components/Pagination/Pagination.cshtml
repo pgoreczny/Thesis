@@ -1,0 +1,25 @@
+﻿@model Pagination
+<nav>
+    <ul class="pagination">
+        @if (Model.hasPrevious)
+        {
+            <li class="page-item"><a class="page-link" href="@string.Format(Model.link, Model.currentPage - 1)">Previous</a></li>
+        }
+
+        @for (int i = 1; i <= Model.totalPages; i++)
+        {
+            if (i == Model.currentPage)
+            {
+                <li class="page-item"><a class="page-link">@i</a></li>
+            }
+            else
+            {
+                <li class="page-item"><a class="page-link" href="@string.Format(Model.link, i)">@i</a></li>
+            }
+        }
+        @if (Model.hasNext)
+        {
+            <li class="page-item"><a class="page-link" href="@string.Format(Model.link, Model.currentPage + 1)">Next</a></li>
+        }
+    </ul>
+</nav>

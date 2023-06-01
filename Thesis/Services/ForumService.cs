@@ -40,19 +40,25 @@ namespace Thesis.Services
         public List<Post> getPostsForCategory(int page, int pageSize, int category)
         {
             int offset = Math.Max(page - 1, 0) * pageSize;
-            List<int> userActivities = context.activities
-                .Where(activity => activity.courseId == category)
-                .Select(activity => activity.id)
-                .ToList();
-            userActivities.Add(0);
             return context.posts
-                .Where(post => post.activityId == null || userActivities.Contains((int)post.activityId))
+                .Where(post => post.courseId == category)
                 .Include(post => post.author)
                 .Include(post => post.comments)
+                .ThenInclude(comment => comment.author)
                 .OrderByDescending(post => post.editDate)
                 .Skip(offset)
                 .Take(pageSize)
                 .ToList();
+        }
+
+        public int getPageCount(int pageSize, int category)
+        {
+            List<int> userActivities = context.activities
+                .Where(activity => activity.courseId == category)
+                .Select(activity => activity.id)
+                .ToList();
+            return (context.posts
+                .Where(post => post.courseId == category).Count() -1) / pageSize + 1;
         }
         public string save(Post post)
         {
@@ -77,7 +83,7 @@ namespace Thesis.Services
                 context.posts.Update(post);
                 context.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 result = e.Message;
             }
@@ -89,8 +95,21 @@ namespace Thesis.Services
             List<Post> posts = context.posts
                 .Where(post => post.id == id)
                 .Include(post => post.comments)
+                .ThenInclude(comment => comment.editor)
                 .Include(post => post.activity)
                 .ThenInclude(activity => activity.course)
+                .ToList();
+            if (posts.Count != 1)
+            {
+                return null;
+            }
+            return posts[0];
+        }
+
+        public Post getPostByActivity(int activity)
+        {
+            List<Post> posts = context.posts
+                .Where(post => post.activityId == activity)
                 .ToList();
             if (posts.Count != 1)
             {
@@ -102,7 +121,7 @@ namespace Thesis.Services
         public PostComment GetComment(int id)
         {
             List<PostComment> comments = context.postComments
-                .Where(comment => comment.id == 0)
+                .Where(comment => comment.id == id)
                 .Include(comment => comment.post)
                 .ToList();
             if (comments.Count != 1)
@@ -123,7 +142,7 @@ namespace Thesis.Services
                 context.postComments.Add(comment);
                 context.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 result = e.Message;
             }
@@ -147,16 +166,35 @@ namespace Thesis.Services
         public void deletePost(Post post)
         {
             context.posts.Remove(post);
+            context.SaveChanges();
         }
 
         public void deleteComment(PostComment comment)
         {
             context.postComments.Remove(comment);
+            context.SaveChanges();
         }
 
-        internal List<string> getCategories(ApplicationUser result)
+        internal List<CategoryModel> getCategories()
         {
-            return context.courses.Select(course => course.name).ToList();
+            ApplicationUser currentUser = userService.getCurrentUser().Result;
+            List<Course> userCourses = context.courseApplicationUsers.Where(cau => cau.ApplicationUserId == currentUser.Id)
+                .Include(cau => cau.course)
+                .Select(cau => cau.course)
+                .Distinct()
+                .ToList();
+            userCourses.Add(context.courses.Find(0));
+            List<CategoryModel> result = new List<CategoryModel>(userCourses.Count);
+            foreach(Course course in userCourses)
+            {
+                List<Post> post = context.posts
+                    .Where(post => post.courseId == course.id)
+                    .Include(post => post.comments)
+                    .OrderByDescending(post => post.editDate)
+                    .ToList();
+                result.Add(new CategoryModel { categoryId = course.id, name =  course.name, newestActivity = post.Count > 0 ? post[0].editDate.ToString("dd-MM-yyyy") : "Never", posts = post.Count });
+            }
+            return result;
         }
     }
 }

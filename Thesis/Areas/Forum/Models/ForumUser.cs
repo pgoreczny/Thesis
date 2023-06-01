@@ -8,7 +8,9 @@ namespace Thesis.Areas.Forum.Models
     {
         public string userId { get; set; }
         public bool canEdit { get; set; }
+        public bool canAdd { get; set; }
         public bool canEditAny { get; set; }
         public bool canDelete { get; set; }
+        public bool canComment { get; set; }
     }
 }

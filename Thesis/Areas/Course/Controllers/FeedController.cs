@@ -226,7 +226,7 @@ namespace Thesis.Areas.Course.Controllers
             {
                 return false;
             }
-            return courseService.checkIfExists(activity.courseId) || courseService.checkCourseAccess(user, id);
+            return courseService.checkIfExists(activity.courseId) && courseService.checkCourseAccess(user, activity.courseId);
         }
     }
 }

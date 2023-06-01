@@ -6,6 +6,9 @@ namespace Thesis.Areas.Forum.Models
     {
         public int id { get; set; }
         public string title { get; set; }
+
+        public Thesis.Models.Course? course { get; set; }
+        public int? courseId { get; set; }
         public Activity? activity { get; set; }
         public int? activityId { get; set; }
         public DateTime date { get; set; }

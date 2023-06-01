@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Areas.Identity.Models;
 using Thesis.database;

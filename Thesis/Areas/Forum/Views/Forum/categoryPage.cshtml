@@ -1,1 +1,102 @@
-﻿
+﻿@using Thesis.Areas.Forum.Models;
+@using Thesis.Models;
+@model (List<Post> posts, ForumUser user, int category, Pagination pagination)
+
+<h3>Forum</h3>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close hideModal">&times;</button>
+                <h4 class="modal-title">Are you sure you want to delete this post?</h4>
+            </div>
+            <div class="modal-body">
+                This action can't be reversed.
+                <br />
+                <button id="delete" class="btn btn-danger">Delete post</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default hideModal">Close without deleting</button>
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model.user.canAdd)
+{
+    <a href="/forum/forum/add?courseId=@Model.category" class="btn btn-success">Add post</a>
+}
+<br />
+<br />
+@foreach (Post post in Model.posts)
+{
+    <div class="card">
+        <div class="card-body">
+            @if (@Model.user.canDelete) {
+                <span data-id="@post.id" class="showModal delete" style="float: right;"><i class="bi bi-trash-fill"></i></span>
+            }
+            @if ((Model.user.canEdit && post.authorId == Model.user.userId) || Model.user.canEditAny)
+            {
+                <a href="/forum/forum/edit?id=@post.id" style="float: right; margin-right: 1em; color: black"><i class="bi bi-pencil-fill"></i></a>
+            }
+            <h5 class="card-title">@post.title</h5>
+            <p class="card-text">
+                written by @post.author.UserName
+                <br />
+                @await Component.InvokeAsync("DateWithText", (post.date, "Created"))
+                @post.comments.Count comments
+            </p>
+            <a href="/forum/forum/post?id=@post.id" style="float: right" class="btn btn-primary">Read more</a>
+        </div>
+    </div>
+    <br />
+}
+@await Component.InvokeAsync("Pagination", Model.pagination)
+<script type="text/javascript">
+    window.onload = function () {
+        $('.showModal').click(function () {
+            $("#myModal").modal("show");
+            $("#myModal").data('id', $(this).data('id'));
+        })
+        $('.hideModal').click(function () {
+            $("#myModal").modal("hide");
+        })
+        $('#delete').click(function () {
+            $("#myModal").modal("hide");
+            const id = $('#myModal').data('id');
+            fetch("/Forum/Forum/deletePost", {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(id),
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        })
+
+    }
+</script>

@@ -1,4 +1,6 @@
-﻿@model (int courseId, int activityId)
+﻿@using Thesis.Areas.Forum.Models;
+@model (Post post, ForumUser user, string url)
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -14,7 +16,7 @@
 			<div class="centered">
 				<br />
 				<br />
-				<input id="title" type="text" class="form-control" placeholder="Title">
+				<input value="@Model.post.title" id="title" type="text" class="form-control" placeholder="Title">
 				<h2>Enter text</h2>
 			</div>
 		</div>
@@ -23,9 +25,10 @@
 				<div class="document-editor__toolbar"></div>
 			</div>
 			<div class="row row-editor">
-				<div data-course="0" id="save" style="background-color: green" onclick="save(@Model)" class="btn btn-success">Save</div>
+				<div data-course="0" id="save" style="background-color: green" onclick="save(@Model.post.id)" class="btn btn-success">Save</div>
 				<div class="editor-container">
 					<div class="editor">
+						@Html.Raw(Model.post.content)
 					</div>
 				</div>
 			</div>
@@ -56,14 +59,12 @@
 				}).showToast();
 			});
 		function save(id) {
-			const content = $('.editor').html();
 			const post = {
-				courseId : @Model.courseId,
-				activityId: @Model.activityId,
+				id: id,
 				title: $('#title').val(),
-				content: content
+				content: $('.editor').html(),
 			};
-			fetch("/Forum/Forum/save", {
+			fetch('@Model.url', {
 				method: 'POST',
 				headers: {
 					Accept: 'application.json',
