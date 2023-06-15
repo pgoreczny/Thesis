@@ -8,12 +8,16 @@ namespace Thesis.Services
     {
         private readonly CoursesDBContext context;
         private readonly UserService userService;
+        private readonly ActivityService activityService;
         private readonly FileService fileService;
-        public CourseService(CoursesDBContext context, UserService userService, FileService fileService)
+        private readonly ForumService forumService;
+        public CourseService(CoursesDBContext context, UserService userService, FileService fileService, ActivityService activityService, ForumService forumService)
         {
             this.context = context;
             this.userService = userService;
             this.fileService = fileService;
+            this.activityService = activityService;
+            this.forumService = forumService;
         }
 
         public void addUser(CourseApplicationUser user)
@@ -138,6 +142,11 @@ namespace Thesis.Services
         public void deleteCourses(List<int> ids)
         {
             List<Course> courses = context.courses.Where(course => ids.Contains(course.id) && course.id != 0).ToList();
+            foreach (int course in ids)
+            {
+                activityService.deleteActivitiesByCourse(course);
+                forumService.deletePostsByCourse(course);
+            }
             context.courses.RemoveRange(courses);
             context.SaveChanges();
         }
@@ -166,7 +175,19 @@ namespace Thesis.Services
                 .Include(x => x.CourseApplicationUsers)
                 .Where(x => x.Id == userId)
                 .First()
-                .CourseApplicationUsers;
+                .CourseApplicationUsers
+                .Where(cau => cau.status == enCourseUserStatus.approved || cau.status == enCourseUserStatus.finished)
+                .ToList();
+        }
+
+        public List<CourseApplicationUser> getUserCoursesAll(string userId)
+        {
+            return context.Users
+                .Include(x => x.CourseApplicationUsers)
+                .Where(x => x.Id == userId)
+                .First()
+                .CourseApplicationUsers
+                .ToList();
         }
 
         public bool checkCourseAccess(ApplicationUser user, int courseId)
@@ -175,6 +196,11 @@ namespace Thesis.Services
                 .Where(join => join.CourseId == courseId && join.ApplicationUserId == user.Id && (join.status == enCourseUserStatus.approved || join.status == enCourseUserStatus.finished))
                 .ToList();
             return joins.Count > 0;
+        }
+
+        internal bool checkIfExists(int? id)
+        {
+            return context.courses.Where(course => course.id == id).Count() > 0;
         }
     }
 }

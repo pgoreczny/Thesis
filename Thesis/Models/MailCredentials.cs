@@ -1,0 +1,11 @@
+﻿namespace Thesis.Models
+{
+    public class MailCredentials
+    {
+        public int id { get; set;  }
+        public string email { get; set; }
+        public string password { get; set; }
+        public string server { get; set; }
+        public bool set { get; set;  }
+    }
+}

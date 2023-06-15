@@ -46,6 +46,7 @@ namespace Thesis.Areas.Identity.Controllers
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserAdd));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserEdit));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserDelete));
+            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.ConfigureEmails));
             await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Users.UserList));
 
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseList));

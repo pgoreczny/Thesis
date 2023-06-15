@@ -45,7 +45,7 @@ namespace Thesis.Areas.Course.Controllers
             crumbs.Add(new Breadcrumb { text = "Edit course", current = true });
             ViewBag.crumbs = crumbs;
             Thesis.Models.Course course = courseService.getCourseById(id);
-            List<Activity> activities = activityService.getActivities();
+            List<Activity> activities = activityService.getActivitiesByCourse(course.id);
             return View("CourseEdit", (course, activities));
         }
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]

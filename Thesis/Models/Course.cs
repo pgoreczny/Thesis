@@ -1,4 +1,6 @@
-﻿namespace Thesis.Models
+﻿using Thesis.Models.Calendar;
+
+namespace Thesis.Models
 {
     public class Course
     {
@@ -18,6 +20,7 @@
         public ApplicationUser updatedBy { get; set; }
         public ICollection<ApplicationUser> users { get; set; }
         public List<Activity> activities { get; set; }
+        public List<Reminder> reminders { get; set; }
         public List<CourseApplicationUser> CourseApplicationUsers = new List<CourseApplicationUser>();
     }
 

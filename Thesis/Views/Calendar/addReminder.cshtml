@@ -1,0 +1,79 @@
+﻿@using Thesis.Models.Calendar
+@model Reminder
+<htmL>
+   <body>
+      <form id="editForm" data-user="@Model.id">
+         <input name="id" style="visibility: hidden" id = "id" value = "@Model.id" />
+         <input name="courseId" style="visibility: hidden" id = "id" value = "@Model.courseId" />
+         @await Component.InvokeAsync("Input", ("name", "Name", Model.name))
+         @await Component.InvokeAsync("TextArea", ("text", "Text", Model.text))
+         @await Component.InvokeAsync("DateInput", ("date", "Date", Model.date))
+         <select id="color" name="color" class="form-select" aria-label="Select reminder color">
+          <option id="primary" value="primary">Blue</option>
+          <option id="success" value="success">Green</option>
+          <option id="danger" value="danger">Red</option>
+          <option id="warning" value="warning">Orange</option>
+          <option id="secondary" value="secondary">Gray</option>
+        </select>
+        <br />
+         <div id="submit" class="btn btn-primary">Submit</div>
+      </form>
+      <script>
+        window.onload = function() {
+            @if (Model.id > 0) {
+                <text>
+                    $('#@Model.color').attr('selected', true);
+                </text>
+            }
+            $('#startDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+            });
+            $('#endDate').datepicker({
+                uiLibrary: 'bootstrap5',
+                format: 'dd-mm-yyyy'
+            });
+            $('#submit').click(function() {
+                $("#myModal").modal("hide");
+                var form = Object.fromEntries(new FormData($('#editForm')[0]));
+                form["showDate"] = formatDate($('#date').val());
+                var formData = new FormData();
+                for (var key in form) {
+                    formData.append(key, form[key]);
+                }
+                    fetch("/calendar/saveReminder", {
+                            method: 'POST',
+                            headers: {
+                                Accept: 'application.json',
+                            },
+                            body: formData,
+                        })
+                        .then(function(a) {
+                            return a.json();
+                        })
+                        .then(function(data) {
+                            Toastify({
+                                text: data.text,
+                                duration: 3000,
+                                style: {
+                                    background: data.success ? "green" : "red"
+                                }
+                            }).showToast();
+                            if (data.success) {
+                                setTimeout(() => {
+                                    location.href = "/calendar/calendar"
+                                }, 1000);
+                            }
+                        })
+                        .catch(error => Toastify({
+                            text: error,
+                            duration: 3000,
+                            style: {
+                                background: "red"
+                            }
+                        }).showToast())
+                })
+        }
+      </script>
+   </body>
+</html>

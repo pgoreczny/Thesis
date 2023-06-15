@@ -1,0 +1,221 @@
+﻿@using Thesis.Models.Calendar;
+@model (List<Week> calendar, DateTime month)
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+
+    .day {
+        width: 10em;
+        height: 10em;
+        position: relative;
+    }
+
+    .date {
+        position: absolute;
+        bottom: 8em;
+        left: 9em;
+        text-align: right;
+    }
+
+    .badge {
+        width: 80%;
+        margin-left: 10%;
+        cursor: pointer;
+    }
+    .hidden {
+        display: none;
+    }
+    .bi {
+        cursor: pointer;
+    }
+    .addButton {
+        position: absolute;
+        bottom: 7em;
+        left: 1em;
+
+    }
+</style>
+
+@{
+    DateTime previous = Model.month.AddMonths(-1);
+    DateTime next = Model.month.AddMonths(1);
+}
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close hideModal">&times;</button>
+                <h4 class="modal-title">Are you sure you want to delete this reminder?</h4>
+            </div>
+            <div class="modal-body">
+                This action can't be reversed.
+                <button id="delete" class="btn btn-danger">Delete reminder</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default hideModal">Close without deleting</button>
+            </div>
+        </div>
+    </div>
+</div>
+<nav>
+    <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="/calendar/calendar?year=@previous.Year&month=@previous.Month">Previous</a></li>
+        <li class="page-item"><a class="page-link">@Model.month.ToString("MMMM yyyy")</a></li>
+        <li class="page-item"><a class="page-link" href="/calendar/calendar?year=@next.Year&month=@next.Month">Next</a></li>
+    </ul>
+</nav>
+
+<table>
+    <tr>
+        <td>Monday</td>
+        <td>Tuesday</td>
+        <td>Wednesday</td>
+        <td>Thursday</td>
+        <td>Friday</td>
+        <td>Saturday</td>
+        <td>Sunday</td>
+    </tr>
+    @foreach (Week week in Model.calendar)
+    {
+        <tr>
+            @foreach (Day day in week.days)
+            {
+                if (day.dayNumber == 0)
+                {
+                    <td class="day"></td>
+                }
+                else
+                {
+                    <td class="day">
+                        <span class="date">
+                            <span>
+                                @day.dayNumber
+                            </span>
+                        </span>
+                        <br />
+                        <span onclick="location.href='/calendar/addReminder?day=@day.dayNumber&month=@Model.month.Month&year=@Model.month.Year'" class="btn btn-outline-primary addButton">Add reminder</span>
+                        @foreach (Reminder reminder in day.reminders)
+                        {
+                            <span data-id="@reminder.id" data-type="@reminder.color" class="badge text-bg-@reminder.color">@reminder.name</span>
+                        }
+                    </td>
+                }
+            }
+        </tr>
+    }
+</table>
+<br/>
+<div id="reminder" name="reminder" class="card hidden" style="width: 70%; margin-left: 10%; margin-right: 10%">
+    <div class="card-header">
+        <span id="reminderDate"></span>
+        <i id="edit" class="bi bi-pencil-fill"></i>
+        <i id="showModal" class="bi bi-trash-fill"></i>
+    </div>
+    <div class="card-body">
+        <h5 id="reminderName" class="card-title"></h5>
+        <p id="reminderText" class="card-text"></p>
+    </div>
+</div>
+<script type="text/javascript">
+    window.onload = function () {
+        $('#showModal').click(function () {
+            $("#myModal").modal("show");
+            $("#myModal").data('id', $('#reminder').data('id'));
+        })
+        $('.hideModal').click(function () {
+            $("#myModal").modal("hide");
+        })
+
+        $('#edit').click(function () {
+            location.href = '/calendar/edit?id=' + $('#reminder').data('id');
+        })
+        $('.badge').click(function () {
+            const id = $(this).data('id');
+            $('#reminder').removeClass();
+            $('#reminder').addClass('card');
+            $('#reminder').addClass('border-' + $(this).data('type'));
+
+            fetch("/calendar/reminder?id=" + id, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    if (data.error)
+                    {
+                        Toastify({
+                            text: data.text,
+                            duration: 3000,
+                            style: {
+                                background: "red"
+                            }
+                        }).showToast();
+                    }
+                    else {
+                        $('#reminder').data('id', id);
+                        $("#reminderName").text(data.name);
+                        $("#reminderText").text(data.text);
+                        $("#reminderDate").text(data.datestring);
+                        window.scrollTo(0, document.body.scrollHeight);
+                        if (data.canModify) {
+                            $('.modify').removeClass('hidden');
+                        }
+                        else {
+                            $('.modify').addClassx('hidden');
+                        }
+                    }
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        })
+
+        $('#delete').click(function () {
+            $("#myModal").modal("hide");
+            const id = $('#myModal').data('id');
+            fetch("/calendar/deleteReminder?id=" + id, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application.json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(id),
+            })
+                .then(function (a) {
+                    return a.json();
+                })
+                .then(function (data) {
+                    Toastify({
+                        text: data.text,
+                        duration: 3000,
+                        style: {
+                            background: data.success ? "green" : "red"
+                        }
+                    }).showToast();
+                    if (data.success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                })
+                .catch(error => Toastify({
+                    text: error,
+                    duration: 3000,
+                    style: {
+                        background: "red"
+                    }
+                }).showToast())
+        })
+    }
+</script>

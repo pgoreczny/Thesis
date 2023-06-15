@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Thesis.Models;
 using File = Thesis.Models.File;
 using Thesis.Areas.Forum.Models;
+using Thesis.Models.Calendar;
 
 namespace Thesis.database
 {
@@ -27,6 +28,8 @@ namespace Thesis.database
         public DbSet<ReviewComment> reviewComments { get; set; }
         public DbSet<Post> posts { get; set; }
         public DbSet<PostComment> postComments { get; set; }
+        public DbSet<Reminder> reminders { get; set; }
+        public DbSet<MailCredentials> mailCredentials { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -75,6 +78,12 @@ namespace Thesis.database
                 .HasOne(c => c.course)
                 .WithMany(c => c.CourseApplicationUsers)
                 .HasForeignKey(au => au.CourseId);
+
+            modelBuilder.Entity<Reminder>()
+                .HasOne(reminder => reminder.course)
+                .WithMany(course => course.reminders)
+                .HasForeignKey(reminder => reminder.courseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

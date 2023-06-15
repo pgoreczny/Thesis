@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Models;
+using Thesis.Models.Calendar;
 using Thesis.Services;
 
 namespace Thesis.Areas.Course.Controllers
@@ -13,14 +14,16 @@ namespace Thesis.Areas.Course.Controllers
         private readonly ActivityService activityService;
         private readonly FileService fileService;
         private readonly UserService userService;
+        private readonly CalendarService calendarService;
         private List<Breadcrumb> crumbs = new List<Breadcrumb>();
-        public ActivityController(CourseService courseService, ActivityService activityService, FileService fileService, UserService userService)
+        public ActivityController(CourseService courseService, ActivityService activityService, FileService fileService, UserService userService, CalendarService calendarService)
         {
             this.courseService = courseService;
             crumbs.Add(new Breadcrumb { text = "Home", url = "/" });
             this.activityService = activityService;
             this.fileService = fileService;
             this.userService = userService;
+            this.calendarService = calendarService;
         }
         [Authorize(Policy = Claims.ManageCourses.CourseEdit)]
         public IActionResult activitiesByCourse(int courseId)
@@ -40,6 +43,7 @@ namespace Thesis.Areas.Course.Controllers
             if (type == "task")
             {
                 activity = new Activity(enActivityType.task);
+                activity.answers = new List<Answer>();
             }
             else
             {
@@ -69,6 +73,18 @@ namespace Thesis.Areas.Course.Controllers
             {
                 activity.createdBy = userService.getCurrentUser().Result;
                 activity.createDate = DateTime.Now;
+                if (activity.activityType == enActivityType.task)
+                {
+                    calendarService.save(new Reminder
+                    {
+                        color = "danger",
+                        courseId = activity.courseId,
+                        text = activity.text,
+                        name = activity.title,
+                        date = activity.dueDate,
+                        userId = userService.getCurrentUser().Result.Id
+                    });
+                }
             }
             activity.updatedBy = userService.getCurrentUser().Result;
             activity.updateDate = DateTime.Now;

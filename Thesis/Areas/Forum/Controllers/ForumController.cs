@@ -375,6 +375,10 @@ namespace Thesis.Areas.Forum.Controllers
                 return true;
             }
             ApplicationUser user = userService.getCurrentUser().Result;
+            if (((System.Security.Claims.ClaimsIdentity)User.Identity).HasClaim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseEdit))
+            {
+                return true;
+            }
             Thesis.Models.Course course = courseService.getCourseById(id);
             if (course == null)
             {

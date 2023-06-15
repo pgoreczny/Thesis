@@ -12,6 +12,7 @@
             public const string UserAdd = "Add user";
             public const string UserEdit = "Edit user";
             public const string UserDelete = "Delete user";
+            public const string ConfigureEmails = "Configure sending e-mails";
         }
 
         public class ManageCourses

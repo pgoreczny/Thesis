@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Thesis.database;
 using Thesis.Models;
 
@@ -32,6 +33,7 @@ namespace Thesis.Services
             List<MenuItem> menu = new List<MenuItem>();
             IList<string> claims = await userService.getUserClaims();
             menu = context.menus
+                .Include(menu => menu.children)
                 .Where(menu => menu.Parent == null && claims.Contains(menu.claim))
                 .ToList();
             return menu;

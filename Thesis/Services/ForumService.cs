@@ -94,6 +94,7 @@ namespace Thesis.Services
         {
             List<Post> posts = context.posts
                 .Where(post => post.id == id)
+                .Include(post => post.course)
                 .Include(post => post.comments)
                 .ThenInclude(comment => comment.editor)
                 .Include(post => post.activity)
@@ -195,6 +196,32 @@ namespace Thesis.Services
                 result.Add(new CategoryModel { categoryId = course.id, name =  course.name, newestActivity = post.Count > 0 ? post[0].editDate.ToString("dd-MM-yyyy") : "Never", posts = post.Count });
             }
             return result;
+        }
+
+        public void deletePostsByActivity(int id)
+        {
+            List<Post> posts = context.posts.Where(post => post.activityId == id).ToList();
+            foreach (Post post in posts)
+            {
+                List<PostComment> comments = context.postComments.Where(comment => comment.postId == post.id).ToList();
+                context.postComments.RemoveRange(comments);
+            }
+            context.SaveChanges();
+            context.posts.RemoveRange(posts);
+            context.SaveChanges();
+        }
+
+        public void deletePostsByCourse(int id)
+        {
+            List<Post> posts = context.posts.Where(post => post.courseId == id).ToList();
+            foreach (Post post in posts)
+            {
+                List<PostComment> comments = context.postComments.Where(comment => comment.postId == post.id).ToList();
+                context.postComments.RemoveRange(comments);
+            }
+            context.SaveChanges();
+            context.posts.RemoveRange(posts);
+            context.SaveChanges();
         }
     }
 }

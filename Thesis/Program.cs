@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Thesis.Areas.Identity.Constants;
 using Thesis.database;
@@ -81,6 +82,8 @@ builder.Services.AddAuthorization(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Services.AddScoped<MenuService, MenuService>();
 builder.Services.AddScoped<UserService, UserService>();
 builder.Services.AddScoped<CourseService, CourseService>();
@@ -89,6 +92,8 @@ builder.Services.AddScoped<FileService, FileService>();
 builder.Services.AddScoped<PaymentService, PaymentService>();
 builder.Services.AddScoped<AnswerService, AnswerService>();
 builder.Services.AddScoped<ForumService, ForumService>();
+builder.Services.AddScoped<UserService, UserService>();
+builder.Services.AddScoped<CalendarService, CalendarService>();
 
 builder.Services.Configure<RequestLocalizationOptions>(opt =>
 {

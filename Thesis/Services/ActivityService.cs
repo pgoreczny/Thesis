@@ -9,11 +9,13 @@ namespace Thesis.Services
     {
         private readonly CoursesDBContext context;
         private readonly FileService fileService;
-        public ActivityService(CoursesDBContext context, FileService fileService)
+        private readonly ForumService forumService;
+        public ActivityService(CoursesDBContext context, FileService fileService, ForumService forumService)
         {
             this.context = context;
             this.context.ChangeTracker.AutoDetectChangesEnabled = false;
             this.fileService = fileService;
+            this.forumService = forumService;
         }
 
         public Activity GetActivityByIdWithParent(int id)
@@ -50,6 +52,12 @@ namespace Thesis.Services
                 .Where(activity => activity.id != 0)
                 .ToList();
         }
+        public List<Activity> getActivitiesByCourse(int courseId)
+        {
+            return context.activities
+                .Where(activity => activity.id != 0 && activity.courseId == courseId)
+                .ToList();
+        }
 
         public int saveActivity(Activity activity)
         {
@@ -62,8 +70,18 @@ namespace Thesis.Services
         public void deleteActivity(int id)
         {
             List<Activity> activities = context.activities.Where(activity => activity.id == id && activity.id != 0).ToList();
+            forumService.deletePostsByActivity(id);
             context.activities.RemoveRange(activities);
             context.SaveChanges();
+        }
+
+        public void deleteActivitiesByCourse(int id)
+        {
+            List<Activity> activities = context.activities.Where(activity => activity.courseId == id).ToList();
+            foreach(Activity activity in activities)
+            {
+                deleteActivity(activity.id);
+            }
         }
 
         public void deleteActivities(List<int> ids)

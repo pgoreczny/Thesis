@@ -8,7 +8,7 @@
          @await Component.InvokeAsync("TextArea", ("description", "Description", Model.description))
          @await Component.InvokeAsync("DateInput", ("startDate", "Start date", Model.startDate))
          @await Component.InvokeAsync("DateInput", ("endDate", "End date", Model.endDate))
-         @await Component.InvokeAsync("Input", ("price", "Price", Model.price))
+         @await Component.InvokeAsync("Input", ("price", "Price", Model.price.ToString()))
          <button type="submit" class="btn btn-primary">Submit</button>
       </form>
       <script>

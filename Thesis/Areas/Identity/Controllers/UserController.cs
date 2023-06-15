@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Thesis.Areas.Identity.Constants;
@@ -16,14 +17,20 @@ namespace Thesis.Areas.Identity.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserService userService;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IEmailSender emailSender;
         private List<Breadcrumb> crumbs = new List<Breadcrumb>();
-        public UserController(UserManager<ApplicationUser> userManager, UserService userService, RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager)
+        public UserController(UserManager<ApplicationUser> userManager,
+            UserService userService,
+            RoleManager<IdentityRole> roleManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender)
         {
             this.userManager = userManager;
             this.userService = userService;
             this.roleManager = roleManager;
             this.signInManager = signInManager;
             crumbs.Add(new Breadcrumb { text = "Home", url = "/" });
+            this.emailSender = emailSender;
         }
 
         [Authorize(Policy = Claims.Users.UserList)]
@@ -139,6 +146,22 @@ namespace Thesis.Areas.Identity.Controllers
                 return new OperationResult { success = true, text = userIds.Count > 1 ? "Users deleted successfully" : "User deleted successfully" };
             }
             return new OperationResult { success = false, text = "One of the users couldn't be found" };
+        }
+
+        [Authorize(Policy = Claims.Users.ConfigureEmails)]
+        public ActionResult configure()
+        {
+            crumbs.Add(new Breadcrumb { text = "Configure e-mails", current = true });
+            return View("configureEmails");
+        }
+
+        [HttpPost]
+        [Authorize(Policy = Claims.Users.ConfigureEmails)]
+        public OperationResult saveConfiguration([FromForm] MailCredentials credentials)
+        {
+            ((EmailSender)emailSender).setCredentials(credentials);
+            emailSender.SendEmailAsync(credentials.email, "Test", "This is test of the e-mail configuration");
+            return new OperationResult() { success = true, text = "Configuration saved. Wait for the test e-mail" };
         }
     }
 }

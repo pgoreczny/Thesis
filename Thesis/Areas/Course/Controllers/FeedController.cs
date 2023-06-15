@@ -33,7 +33,7 @@ namespace Thesis.Areas.Course.Controllers
         {
             crumbs[1] = new Breadcrumb { text = "Available courses", current = true };
             ViewBag.crumbs = crumbs;
-            List<CourseApplicationUser> joins = courseService.getUserCourses(userService.getCurrentUser().Result.Id);
+            List<CourseApplicationUser> joins = courseService.getUserCoursesAll(userService.getCurrentUser().Result.Id);
             return View("courses", (courseService.getAvailable(), joins));
         }
 
