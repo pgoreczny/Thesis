@@ -7,7 +7,7 @@ namespace Thesis.Services
     public class FileService
     {
         private readonly CoursesDBContext context;
-        private List<string> extensions = new List<string> { ".pdf", ".doc", ".docx", ".jpg", ".png" };
+        private List<string> extensions = new List<string> { ".pdf", ".doc", ".txt", "rtf", "odt", ".docx", ".jpg", ".png", "ppt", "pptx" };
         public FileService(CoursesDBContext context)
         {
             this.context = context;

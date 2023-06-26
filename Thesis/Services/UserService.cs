@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Areas.Identity.Models;
 using Thesis.database;
@@ -27,6 +28,11 @@ namespace Thesis.Services
             }
             string username = accessor?.HttpContext?.User.Identity.Name;
             return await userManager.FindByNameAsync(username);
+        }
+
+        public async Task<IdentityResult> assignStudentAsync(ApplicationUser user)
+        {
+            return await userManager.AddToRoleAsync(user, Roles.Student);
         }
 
         public async Task<ApplicationUser> getUserById(string userId)

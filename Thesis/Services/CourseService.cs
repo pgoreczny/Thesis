@@ -6,11 +6,11 @@ namespace Thesis.Services
 {
     public class CourseService
     {
-        private readonly CoursesDBContext context;
         private readonly UserService userService;
         private readonly ActivityService activityService;
         private readonly FileService fileService;
         private readonly ForumService forumService;
+        private readonly CoursesDBContext context;
         public CourseService(CoursesDBContext context, UserService userService, FileService fileService, ActivityService activityService, ForumService forumService)
         {
             this.context = context;
@@ -146,6 +146,7 @@ namespace Thesis.Services
             {
                 activityService.deleteActivitiesByCourse(course);
                 forumService.deletePostsByCourse(course);
+                context.reminders.RemoveRange(context.reminders.Where(reminder => reminder.courseId == course).ToList());
             }
             context.courses.RemoveRange(courses);
             context.SaveChanges();

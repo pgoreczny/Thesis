@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using Thesis.Areas.Identity.Constants;
 using Thesis.Migrations;
 using Thesis.Models;
 using Thesis.Services;
+using static Thesis.Areas.Identity.Constants.Claims;
 
 namespace Thesis.Areas.Course.Controllers
 {
@@ -83,6 +85,10 @@ namespace Thesis.Areas.Course.Controllers
             if (join.ApplicationUserId != "")
             {
                 string result = courseService.updateConnection(courseId, id, enCourseUserStatus.approved);
+                if (result == "")
+                {
+                    bool addedRole = userService.assignStudentAsync(userService.getUserById(id).Result).Result.Succeeded;
+                }
                 return new OperationResult { success = string.IsNullOrEmpty(result), text = string.IsNullOrEmpty(result) ? "User approved" : result };
             }
             return new OperationResult { success = false, text = "User couldn't be found" };

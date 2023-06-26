@@ -46,7 +46,6 @@ namespace Thesis.Areas.Identity.Controllers
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserAdd));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserEdit));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.UserDelete));
-            await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Users.ConfigureEmails));
             await roleManager.AddClaimAsync(lecturer, new Claim(CustomClaimTypes.Permission, Claims.Users.UserList));
 
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.ManageCourses.CourseList));
@@ -72,6 +71,7 @@ namespace Thesis.Areas.Identity.Controllers
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.ParticipateInCourse));
             await roleManager.AddClaimAsync(student, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
             await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.SeeCourses));
+            await roleManager.AddClaimAsync(registered, new Claim(CustomClaimTypes.Permission, Claims.UserCourses.JoinCourse));
 
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.ReadPost));
             await roleManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Claims.Forum.WritePost));

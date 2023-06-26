@@ -179,7 +179,7 @@ namespace Thesis.Services
         internal List<CategoryModel> getCategories()
         {
             ApplicationUser currentUser = userService.getCurrentUser().Result;
-            List<Course> userCourses = context.courseApplicationUsers.Where(cau => cau.ApplicationUserId == currentUser.Id)
+            List<Course> userCourses = context.courseApplicationUsers.Where(cau => cau.ApplicationUserId == currentUser.Id && (cau.status == enCourseUserStatus.finished || cau.status == enCourseUserStatus.approved))
                 .Include(cau => cau.course)
                 .Select(cau => cau.course)
                 .Distinct()

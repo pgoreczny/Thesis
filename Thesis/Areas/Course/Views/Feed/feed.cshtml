@@ -3,6 +3,7 @@
 <h1 class="display-5 fw-bold">@Model.name</h1>
 <h5 class="col-md-12" style="border: solid 0.5px; padding: 0.5em 0.5em 0.5em 0.5em">@Model.description</h5>
 
+<a href="/calendar/courseCalendar?courseId=@Model.id" class="btn btn-info">Course calendar</a>
 @foreach (Activity activity in Model.activities)
 {
     @await Component.InvokeAsync("FeedActivity", activity)

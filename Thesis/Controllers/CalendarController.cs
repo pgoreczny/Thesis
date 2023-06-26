@@ -40,7 +40,7 @@ namespace Thesis.Controllers
         }
 
         [Authorize(Policy = Claims.UserCourses.ParticipateInCourse)]
-        public ActionResult courseCalendar([FromQuery] int year, [FromQuery] int month, [FromQuery] int courseId)
+        public ActionResult courseCalendar([FromQuery] int courseId, [FromQuery] int year = 0, [FromQuery] int month = 0)
         {
             try
             {
@@ -50,9 +50,9 @@ namespace Thesis.Controllers
                     return LocalRedirect("/Home/showError");
                 }
                 Course course = courseService.getCourseById(courseId);
-                List<Week> calendar = calendarService.getCalendarModel(new DateTime(year, month, 1), courseId);
+                List<Week> calendar = calendarService.getCalendarModel(date, courseId);
                 crumbs.Add(new Breadcrumb { text = course.name, current = true });
-                return View("courseCalendar", calendar);
+                return View("courseCalendar", (calendar, date, courseId));
             }
             catch
             {
@@ -67,7 +67,7 @@ namespace Thesis.Controllers
             crumbs[1] = new Breadcrumb { text = "Courses", url = "/course/course/courselist" };
             crumbs.Add(new Breadcrumb { text = course.name, url = "/Course/Course/edit?id=\" + course.id" });
             crumbs.Add(new Breadcrumb { text = "Add reminder", current = true });
-            return View("addReminder", courseId);
+            return View("addReminder", new Reminder { courseId = courseId });
         }
 
         [Authorize(Policy = Claims.Basic.IsRegistered)]

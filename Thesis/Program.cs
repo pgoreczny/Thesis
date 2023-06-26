@@ -13,7 +13,7 @@ builder.Services.AddDbContext<CoursesDBContext>(options =>
     options.UseSqlServer(connectionString)
     );
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<CoursesDBContext>();
 

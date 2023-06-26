@@ -110,8 +110,8 @@
 <div id="reminder" name="reminder" class="card hidden" style="width: 70%; margin-left: 10%; margin-right: 10%">
     <div class="card-header">
         <span id="reminderDate"></span>
-        <i id="edit" class="bi bi-pencil-fill"></i>
-        <i id="showModal" class="bi bi-trash-fill"></i>
+        <i id="edit" class="bi bi-pencil-fill modify"></i>
+        <i id="showModal" class="bi bi-trash-fill modify"></i>
     </div>
     <div class="card-body">
         <h5 id="reminderName" class="card-title"></h5>
@@ -168,7 +168,7 @@
                             $('.modify').removeClass('hidden');
                         }
                         else {
-                            $('.modify').addClassx('hidden');
+                            $('.modify').addClass('hidden');
                         }
                     }
                 })

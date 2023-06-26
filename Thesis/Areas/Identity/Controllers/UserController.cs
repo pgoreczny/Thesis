@@ -147,21 +147,5 @@ namespace Thesis.Areas.Identity.Controllers
             }
             return new OperationResult { success = false, text = "One of the users couldn't be found" };
         }
-
-        [Authorize(Policy = Claims.Users.ConfigureEmails)]
-        public ActionResult configure()
-        {
-            crumbs.Add(new Breadcrumb { text = "Configure e-mails", current = true });
-            return View("configureEmails");
-        }
-
-        [HttpPost]
-        [Authorize(Policy = Claims.Users.ConfigureEmails)]
-        public OperationResult saveConfiguration([FromForm] MailCredentials credentials)
-        {
-            ((EmailSender)emailSender).setCredentials(credentials);
-            emailSender.SendEmailAsync(credentials.email, "Test", "This is test of the e-mail configuration");
-            return new OperationResult() { success = true, text = "Configuration saved. Wait for the test e-mail" };
-        }
     }
 }
